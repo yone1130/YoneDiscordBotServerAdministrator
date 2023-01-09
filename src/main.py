@@ -12,10 +12,8 @@ from discord.ext import commands
 from data import config
 
 # -------------------- Init -------------------- #
-
-# UNIX系コマンドラインでは `os.system('clear')`
-# Windows系コマンドラインでは `os.system('cls')` に適宜置き換えてください
-os.system('cls')
+clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
+clearConsole()
 
 print(
     f"Yone Discord Bot Server Administrator\n"+\

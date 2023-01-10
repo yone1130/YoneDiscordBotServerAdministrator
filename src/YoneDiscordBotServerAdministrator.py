@@ -7,12 +7,16 @@
 import discord
 
 
+# -------------------- Main -------------------- #
 class discordBot(discord.Client):
+
+    # ---------- On ready ---------- #
     async def on_ready(self):
         print(">Ready.  Waiting for any command and message\n")
         return
 
 
+    # ---------- On message ---------- #
     async def on_message(self, message):
         if message.author.bot:
             return
@@ -64,6 +68,7 @@ class discordBot(discord.Client):
         return
 
 
+    # ---------- On member join ---------- #
     async def on_member_join(self, member):
         embed=discord.Embed(
             title=f"{member.mention} が参加しました。",
@@ -98,29 +103,7 @@ class discordBot(discord.Client):
         return
 
 
-    async def on_member_remove(self, member):
-        embed=discord.Embed(
-            title=f"{member.mention} が脱退しました。",
-            color= 0x40ff40,
-        )
-        embed.set_thumbnail(url=member.avatar)
-
-        if member.bot == True:
-            embed.description = "これはBotアカウントです。"
-        else:
-            embed.description = f"参加ありがとうございました。"
-        
-        embed.add_field(
-            name="ユーザー名",
-            value=member.name
-        )
-
-        channel = discord.Client.get_channel(self, 1053378446627188779)
-        await channel.send(embed=embed)
-
-        return
-
-
+    # ---------- On member remove ---------- #
     async def on_member_remove(self, member):
         embed=discord.Embed(
             title=f"{member.mention} が脱退しました。",

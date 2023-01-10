@@ -12,6 +12,8 @@ from discord.ext import commands
 from YoneDiscordBotServerAdministrator import discordBot
 from data import config
 
+
+# -------------------- Init -------------------- #
 clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 clearConsole()
 
@@ -22,6 +24,8 @@ print(
     f"--------------------\n"
 )
 
+
+# -------------------- Main -------------------- #
 intents = discord.Intents.all()
 intents.message_content = True
 

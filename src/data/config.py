@@ -4,5 +4,4 @@
 # (c) 2022-2023 よね/Yone
 #
 
-# Discord Botのトークン
 TOKEN = ""

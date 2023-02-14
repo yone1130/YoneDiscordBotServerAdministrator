@@ -57,6 +57,7 @@ async def on_message(message):
             await message.delete()
 
             channel = client.get_channel(config.spamChannels[message.guild.id])
+
             await channel.send(
                 embed=discord.Embed(
                     title="スパム行為を検出",
@@ -85,9 +86,8 @@ async def on_message(message):
 # ---------- On member join ---------- #
 @client.event
 async def on_member_join(member):
+    # log
     if member.guild.id in config.joinedChannels:
-
-        # log
         embed=discord.Embed(
             title=f"{member.name} が参加しました。",
             color= 0x40ff40,
@@ -96,6 +96,7 @@ async def on_member_join(member):
 
         if member.bot:
             embed.description = "これはBotアカウントです。"
+
         else:
             embed.description = f"{member.guild.name} へようこそ！"
 
@@ -114,7 +115,6 @@ async def on_member_join(member):
             name="アカウントの作成日時",
             value=created_at
         )
-
         channel = client.get_channel(config.joinedChannels[member.guild.id])
         await channel.send(embed=embed)
 
@@ -122,6 +122,7 @@ async def on_member_join(member):
     if member.bot == False:
         if member.guild.id in config.welcomeChannels:
             channel = client.get_channel(config.welcomeChannels[member.guild.id])
+
             if member.guild.id in {1053378444781703339}:  # My server
                 await channel.send(
                     content=f"{member.mention} さん。\n\n"+
@@ -134,6 +135,7 @@ async def on_member_join(member):
                             "https://yone1130.github.io/site/discord-terms/\n\n"+
                             "__メンバーロールの付与は手動(荒らし防止)のため、時間がかかる場合がございます。__"
                 )
+
             else:  # Other guild
                 await channel.send(
                     content=f"{member.mention} さん。\n"+
@@ -154,17 +156,18 @@ async def on_member_remove(member):
 
         if member.bot == True:
             embed.description = "これはBotアカウントです。"
+
         else:
             embed.description = f"参加ありがとうございました。"
-        
+
         embed.add_field(
             name="ユーザー名",
             value=member.mention
         )
-
         channel = client.get_channel(config.joinedChannels[member.guild.id])
         await channel.send(embed=embed)
 
     return
 
+# ---------- Run ---------- #
 client.run(config.TOKEN)  # Login

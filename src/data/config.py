@@ -1,32 +1,12 @@
 #
-# data\config.py | Yone Discord Bot Server Administrator
+# data\config.py | Yone Discord Bot
 #
 # (c) 2022-2023 よね/Yone
+# licensed under the Apache License 2.0
 #
 
+#バージョン
+version = "1.3.0"
+
+# Discord Botのトークン
 TOKEN = ""
-
-# Welcome Channels
-welcomeChannels = {
-
-}
-
-# Notification channels when a member joins
-joinedChannels = {
-
-}
-
-# Rule Channels
-ruleChannels = {
-
-}
-
-# Member Role
-memberRoles = {
-
-}
-
-# Notification channels when spam is detected
-spamChannels = {
-
-}

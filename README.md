@@ -1,11 +1,7 @@
 
-# Yone Discord Bot Administrator
+# Yone Discord Bot
 
-## About
-サーバー管理用のDiscordBotです。
+## About | 概要
 
-## Usage Technology
-
-#### Langage
-- Python
-- discord.py
+Open source version of Yone Discord Bot (Python version).
+Yone Discord Bot (Python版) のオープンソース版です。

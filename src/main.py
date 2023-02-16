@@ -1,25 +1,20 @@
 #
-# main.py | Yone Discord Bot
+# main.py | Yone Discord Bot Server Administrator
 #
 # (c) 2022-2023 よね/Yone
-# licensed under the Apache License 2.0
 #
 
 import os
-import time
-import datetime
-import requests
-from bs4 import BeautifulSoup
 import discord
-from data import config, config_global
+from data import config
 
 # -------------------- Init -------------------- #
 clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 clearConsole()
 
 print(
-    f"Yone Discord Bot  Ver {config.version}\n"+\
-    f"(c) 2022 よね/Yone\n\n"+\
+    f"Yone Discord Bot Server Administrator\n"+\
+    f"(c) 2022-2023 よね/Yone\n\n"+\
     f"discord.py  Ver {discord.__version__}\n\n"+\
     f"--------------------\n"
 )
@@ -29,33 +24,163 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 cmdTree = discord.app_commands.CommandTree(client=client)
 
-class Isday:
-    def __init__(self, url):
-        self.url = url
-
-    def get(self):
-        res = requests.get(self.url)
-
-        if res.status_code == requests.codes.ok:
-            soup = BeautifulSoup(res.text, "html.parser")
-
-            elemName = soup.select('#dateDtl > dt > span')
-            elemDes = soup.select('#dateDtl > dd')
-            name = elemName[0].contents[0]
-            des = elemDes[0].contents[0]
-
-            return True, name, des
-
-        else:
-            print(f"Cannot get. HTTP {res.status_code}")
-            return False, None, None
-
-# -------------------- Functions -------------------- #
-# ---------- On ready ---------- #
+# -------------------- Main -------------------- #
+#  ---------- Events ---------- #
+# ----- On ready ----- #
 @client.event
 async def on_ready():
     await cmdTree.sync()
     print(">Ready.  Waiting for any command and message\n")
+    return
+
+# ----- On message ----- #
+@client.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    if message.author.guild_permissions.administrator:
+        pass
+
+    else:
+        if len(message.mentions) >= 5:
+            await message.reply(
+                embed=discord.Embed(
+                    title="⚠警告⚠",
+                    description="大量メンション行為は禁止です。\n"+
+                                "該当メッセージは削除されます。\n"+
+                                "※この警告メッセージは１５秒後に自動削除します。",
+                    color=0xff4040
+                )
+                .set_footer(
+                    text="警告種別コード: 0x01001"
+                ),
+                delete_after=15
+            )
+            await message.delete()
+
+            channel = client.get_channel(config.spamChannels[message.guild.id])
+
+            await channel.send(
+                embed=discord.Embed(
+                    title="スパム行為を検出",
+                    description="スパム行為 大量メンション を検出したため、\n"+
+                                "該当メッセージを削除しました。\n",
+                    color=0xffff40
+                )
+                .add_field(
+                    name="チャンネル",
+                    value=message.channel.mention
+                )
+                .add_field(
+                    name="メッセージ送信者",
+                    value=message.author.mention
+                )
+                .add_field(
+                    name="メッセージ内容",
+                    value=f"{message.content}"
+                )
+            )
+
+            return
+
+    return
+
+# ----- On member join ----- #
+@client.event
+async def on_member_join(member):
+    # log
+    if member.guild.id in config.joinedChannels:
+        embed=discord.Embed(
+            title=f"{member.name} が参加しました。",
+            color= 0x40ff40,
+        )
+        embed.set_thumbnail(url=member.avatar)
+
+        if member.bot:
+            embed.description = "これはBotアカウントです。"
+
+        else:
+            embed.description = f"{member.guild.name} へようこそ！"
+
+        created_at = str(member.created_at.year)+"/"+\
+                    str(member.created_at.month).zfill(2)+"/"+\
+                    str(member.created_at.day).zfill(2)+" "+\
+                    str(member.created_at.hour).zfill(2)+":"+\
+                    str(member.created_at.minute).zfill(2)+":"+\
+                    str(member.created_at.second).zfill(2)
+
+        embed.add_field(
+            name="ユーザー名",
+            value=member.mention
+        )
+        embed.add_field(
+            name="アカウントの作成日時",
+            value=created_at
+        )
+        channel = client.get_channel(config.joinedChannels[member.guild.id])
+        await channel.send(embed=embed)
+
+    # welcome
+    if member.bot == False:
+        if member.guild.id in config.welcomeChannels:
+            channel = client.get_channel(config.welcomeChannels[member.guild.id])
+            ruleChannel = client.get_channel(config.ruleChannels[member.guild.id])
+
+            if member.guild.id in {1053378444781703339}:  # My server
+                await channel.send(
+                    content=f"{member.mention} さん。\n\n"+
+                            f"ようこそ {member.guild.name} へ！\n"+
+                            f"Welcome to {member.guild.name}!\n\n"+
+                             "参加いただきありがとうございます。\n"+
+                             "Thank you for joining.\n\n"+
+                             "必ずガイドラインをご確認ください。\n"+
+                             "Please check the guidelines.\n"+
+                            f"{ruleChannel.mention}\n\n"
+                )
+
+            else:  # Other guild
+                await channel.send(
+                    content=f"{member.mention} さん。\n\n"+
+                            f"ようこそ {member.guild.name} へ！\nWelcome to {member.guild.name}!\n\n"+
+                                "必ずルールをご確認ください。\nPlease check the rule.\n"+
+                            f"{ruleChannel.mention}"
+                )
+
+    return
+
+# ----- On member remove ----- #
+@client.event
+async def on_member_remove(member):
+    if  member.guild.id in config.joinedChannels:
+        embed=discord.Embed(
+            title=f"{member.name} が脱退しました。",
+            color= 0x40ff40,
+        )
+        embed.set_thumbnail(url=member.avatar)
+
+        if member.bot == True:
+            embed.description = "これはBotアカウントです。"
+
+        else:
+            embed.description = f"参加ありがとうございました。"
+
+        embed.add_field(
+            name="ユーザー名",
+            value=member.mention
+        )
+        channel = client.get_channel(config.joinedChannels[member.guild.id])
+        await channel.send(embed=embed)
+
+    return
+
+# ----- On reaction add ----- #
+@client.event
+async def on_raw_reaction_add(reaction):
+    if  reaction.message_id in [1074994444509642752, 1073629279079911505, 1055443071866765352]:
+        roles = reaction.member.guild.get_role(config.memberRoles[reaction.member.guild.id])
+        await reaction.member.add_roles(roles, reason="ガイドラインに同意しました。")
+
     return
 
 # ---------- Commands ---------- #
@@ -63,249 +188,52 @@ async def on_ready():
 
 # ----- info ----- #
 @cmdTree.command(
-    name = 'info',
-    description = '情報表示',
+    name="info",
+    description="Send bot information"
 )
-async def info(inter):
+async def info(inter: discord.Interaction):
     embed = discord.Embed(
-    title="Yone Bot",
+        title="Yone Bot Server Administrator",
         color= 0x40ff40,
-        description=""
+        description='(c) 2022-2023 よね/Yone\n'+
+                    '不具合等の連絡は <@892376684093898772> までお願いいたします。'
     )
-    embed.add_field(
-        name=f'Ver {config.version}',
-        value='(c) 2022 よね/Yone\n'+
-                '不具合等の連絡は <@892376684093898772> までお願いいたします。'
-    )
-
     await inter.response.send_message(embed=embed)
-
     return
 
-# ----- Embed ----- #
+# ----- clear ----- #
 @cmdTree.command(
-    name = 'embed',
-    description = 'embedメッセージを生成'
+    name="clear",
+    description="Clear message(s)"
 )
-@discord.app_commands.describe(
-    title="タイトル",
-    description="概要",
-    color="16進数RGB型（例: 40ff40）"
-)
-async def embed(inter: discord.Interaction, description:str, title:str=None, color:str=None):
-    if title == None:
-        title = ""
+async def clear(inter: discord.Interaction, target:int):
+    if inter.user.guild_permissions.administrator:
+        await inter.response.send_message(content="Please while...")
 
-    if description == None: 
-        description = ""
-
-    if color == None:
-        color="40ff00"
-
-    try:
-        color = int(color, 16)
-
-    except Exception as e:
-        await inter.response.send_message("引数color が16進数RGB型ではありません。（例: 40ff40）", ephemeral=True)
-        return
-
-    embed = discord.Embed(
-        title=title,
-        color=color,
-        description=description
-    )
-
-    await inter.response.send_message(embed=embed)
-
-    return
-
-# ----- messages ----- #
-@client.event
-async def on_message(message):
-    if message.author.bot:
-        return
-
-    # ---------- Global Chat ---------- #
-    if message.channel.id in config_global.globalChannels:
-        if message.author.id in config_global.globalBanList:
-            await message.reply("あなたはグローバルチャット内においてBANされているため送信できません。")
-            return
-
-        for chan in config_global.globalChannels:
-            if message.channel.id == chan:
-                continue
-
-            channel = client.get_channel(chan)
-            color   = 0x40ff40
-
-            embed = discord.Embed(
-                title="",
-                color=color,
-                description=message.content
-            )
-            embed.set_author(
-                name=message.author.name,
-                # url="",
-                icon_url=message.author.avatar_url
-            )
-            embed.set_footer(text=message.guild.name, icon_url=message.guild.icon_url)
-
-            if message.attachments != []:
-                embed.description += "\n(添付ファイル)"
-                embed.set_image(url=message.attachments[0].proxy_url)
-
-            try:
-                await channel.send(embed=embed)
-
-            except Exception as e:
-                await message.reply("送信エラーが発生しました。")
-                print(chan)
-                print(e)
-
-    elif message.guild.id in config_global.globalChannels:
-        await message.reply("このサーバーはグローバルチャット内においてBANされているため送信できません。")
-        return
-
-    return
-
-# ----- isday ----- #
-@cmdTree.command(
-    name = 'isday',
-    description = '今日は何の日かを送信します。',
-)
-async def isday(inter: discord.Interaction):
-    bs = Isday(url="https://kids.yahoo.co.jp/today/")
-    status, name, des = bs.get()
-
-    if status:
-        print(f"{name}\n{des}")
-
-        nowDate = datetime.datetime.now()
-        nowDate = nowDate.strftime('%Y年%m月%d日')
+        deleted = await inter.channel.purge(
+            limit=target+1,
+            reason=f"{inter.user.name} が /clear を使用しました。"
+        )
 
         embed = discord.Embed(
-        title="今日は何の日",
+            title="Deleted messages",
             color= 0x40ff40,
-            description=f"{nowDate}\n"
+            description=f"{len(deleted)-1}個のメッセージを削除しました。\n"+
+                        f"{inter.user.mention} が /clear を使用しました。"
         )
-        embed.add_field(
-            name=f"今日は {name}\n\n",
-            value=f"{des}"
-        )
-        await inter.response.send_message(embed=embed)
+
+        await inter.channel.send(embed=embed, delete_after=10)
 
         return
-
+    
     else:
         embed = discord.Embed(
-            title="エラーが発生しました。",
+            title="Error",
             color= 0xff4040,
-            description="取得に失敗しました。"
+            description="あなたはこのコマンドを実行する権限がありません。"
         )
-        embed.set_footer(
-            text=f"エラーコード: 0x0201"
-        )
-        await inter.response.send_message(embed=embed)
-
+        await inter.response.send_message(embed=embed, ephemeral=True)
         return
 
-# ----------------------------------------------------- #
-# -------------------- Global Chat -------------------- #
-# ----------------------------------------------------- #
-
-# ----- Init ----- #
-@cmdTree.command(
-  name = 'global-init',
-  description = 'グローバルチャットの登録'
-)
-@discord.app_commands.describe(
-    category_id="グローバルチャットのチャンネルを作成するカテゴリID",
-    channel_name="作成するグローバルチャットのチャンネル名"
-)
-async def initGlobal(inter: discord.Interaction, category_id:str, channel_name:str):
-
-    category_id = int(category_id)
-    category    = client.get_channel(category_id)
-
-    if category == None:
-        await inter.response.send_message("カテゴリIDを正しく入力してください。", ephemeral=True)
-        return
-
-    if inter.guild != category.guild:
-        await inter.response.send_message("他のサーバーを登録することはできません。", ephemeral=True)
-        return
-
-    try:
-        ch = await category.create_text_channel(name=channel_name)
-
-    except Exception as e:
-        await inter.response.send_message(
-            embed=discord.Embed(
-                title="エラーが発生しました",
-                color= 0xff4040,
-                description= "チャンネルを作成できませんでした。"
-            )
-            .set_footer(
-                text=f"エラーコード: 0x0301"
-            ),
-            ephemeral=True
-        )
-        return
-
-    await inter.response.send_message(f"グローバルチャットのチャンネルが登録されました。{ch.mention}")
-
-    print(
-        "[新規チャンネル登録]\n"+\
-        f"chan ID   : {ch.id}\n"+\
-        f"chan name : {ch.name}\n"+\
-        f"sever name: {ch.guild.name}\n"
-    )
-    config_global.globalChannels.append(ch.id)
-
-    for chan in config_global.globalChannels:
-        channel = client.get_channel(chan)
-        color   = 0x40ff40
-
-        embed = discord.Embed(
-            title="新しいチャンネルが登録されました。",
-            color=color,
-            description=f"サーバー名　: {ch.guild.name}\n"+
-                        f"チャンネル名: {ch.name}\n"
-        )
-
-        try:
-            await channel.send(embed=embed)
-
-        except Exception as e:
-            await inter.response.send_message("一部のサーバーに送信できませんでした。", ephemeral=True)
-            continue
-
-# ----- Check ----- #
-@cmdTree.command(
-  name = 'global-chk',
-  description = 'グローバルチャットの登録数の確認'
-)
-async def initGlobal(inter: discord.Interaction):
-    content = ""
-    color   = 0x40ff40
-
-    embed = discord.Embed(
-        title=f"グローバルチャットの登録数：{str(len(config_global.globalChannels))}",
-        color=color,
-        description=content
-    )
-
-    for chan in config_global.globalChannels:
-        channel = client.get_channel(chan)
-
-        embed.add_field(
-            name=channel.guild.name,
-            value=channel.name
-        )
-
-    await inter.response.send_message(embed=embed)
-
-    return
-
-# ---------- RUN ---------- #
+# ---------- Run ---------- #
 client.run(config.TOKEN)  # Login

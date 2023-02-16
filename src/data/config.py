@@ -8,15 +8,25 @@ TOKEN = ""
 
 # Welcome Channels
 welcomeChannels = {
-    <Server ID>: <Channel ID>
+
 }
 
 # Notification channels when a member joins
 joinedChannels = {
-    <Server ID>: <Channel ID>
+
+}
+
+# Rule Channels
+ruleChannels = {
+
+}
+
+# Member Role
+memberRoles = {
+
 }
 
 # Notification channels when spam is detected
 spamChannels = {
-    <Server ID>: <Channel ID>
+
 }

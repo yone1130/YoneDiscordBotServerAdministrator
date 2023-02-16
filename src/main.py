@@ -22,15 +22,18 @@ print(
 intents = discord.Intents.all()
 intents.message_content = True
 client = discord.Client(intents=intents)
+cmdTree = discord.app_commands.CommandTree(client=client)
 
 # -------------------- Main -------------------- #
-# ---------- On ready ---------- #
+#  ---------- Events ---------- #
+# ----- On ready ----- #
 @client.event
 async def on_ready():
+    await cmdTree.sync()
     print(">Ready.  Waiting for any command and message\n")
     return
 
-# ---------- On message ---------- #
+# ----- On message ----- #
 @client.event
 async def on_message(message):
     if message.author.bot:
@@ -83,7 +86,7 @@ async def on_message(message):
 
     return
 
-# ---------- On member join ---------- #
+# ----- On member join ----- #
 @client.event
 async def on_member_join(member):
     # log
@@ -122,29 +125,31 @@ async def on_member_join(member):
     if member.bot == False:
         if member.guild.id in config.welcomeChannels:
             channel = client.get_channel(config.welcomeChannels[member.guild.id])
+            ruleChannel = client.get_channel(config.ruleChannels[member.guild.id])
 
             if member.guild.id in {1053378444781703339}:  # My server
                 await channel.send(
                     content=f"{member.mention} さん。\n\n"+
                             f"ようこそ {member.guild.name} へ！\n"+
                             f"Welcome to {member.guild.name}!\n\n"+
-                            "参加いただきありがとうございます。\n"+
-                            "Thank you for joining.\n\n"+
-                            "まずはガイドラインをご確認ください。\n"+
-                            "Please check the guidelines first.\n"+
-                            "https://yone1130.github.io/site/discord-terms/\n\n"+
-                            "__メンバーロールの付与は手動(荒らし防止)のため、時間がかかる場合がございます。__"
+                             "参加いただきありがとうございます。\n"+
+                             "Thank you for joining.\n\n"+
+                             "必ずガイドラインをご確認ください。\n"+
+                             "Please check the guidelines.\n"+
+                            f"{ruleChannel.mention}\n\n"
                 )
 
             else:  # Other guild
                 await channel.send(
-                    content=f"{member.mention} さん。\n"+
-                            f"ようこそ {member.guild.name} へ！\nWelcome to {member.guild.name}!\n"
+                    content=f"{member.mention} さん。\n\n"+
+                            f"ようこそ {member.guild.name} へ！\nWelcome to {member.guild.name}!\n\n"+
+                                "必ずルールをご確認ください。\nPlease check the rule.\n"+
+                            f"{ruleChannel.mention}"
                 )
 
     return
 
-# ---------- On member remove ---------- #
+# ----- On member remove ----- #
 @client.event
 async def on_member_remove(member):
     if  member.guild.id in config.joinedChannels:
@@ -168,6 +173,67 @@ async def on_member_remove(member):
         await channel.send(embed=embed)
 
     return
+
+# ----- On reaction add ----- #
+@client.event
+async def on_raw_reaction_add(reaction):
+    if  reaction.message_id in [1074994444509642752, 1073629279079911505, 1055443071866765352]:
+        roles = reaction.member.guild.get_role(config.memberRoles[reaction.member.guild.id])
+        await reaction.member.add_roles(roles, reason="ガイドラインに同意しました。")
+
+    return
+
+# ---------- Commands ---------- #
+@discord.app_commands.guilds(discord.Object(id=1053378444781703339))
+
+# ----- info ----- #
+@cmdTree.command(
+    name="info",
+    description="Send bot information"
+)
+async def info(inter: discord.Interaction):
+    embed = discord.Embed(
+        title="Yone Bot Server Administrator",
+        color= 0x40ff40,
+        description='(c) 2022-2023 よね/Yone\n'+
+                    '不具合等の連絡は <@892376684093898772> までお願いいたします。'
+    )
+    await inter.response.send_message(embed=embed)
+    return
+
+# ----- clear ----- #
+@cmdTree.command(
+    name="clear",
+    description="Clear message(s)"
+)
+async def clear(inter: discord.Interaction, target:int):
+    if inter.user.guild_permissions.administrator:
+        await inter.response.send_message(content="Please while...")
+
+        deleted = await inter.channel.purge(
+            limit=target+1,
+            reason=f"{inter.user.name} が /clear を使用しました。"
+        )
+
+        embed = discord.Embed(
+            title="Deleted messages",
+            color= 0x40ff40,
+            description=f"{len(deleted)-1}個のメッセージを削除しました。\n"+
+                        f"{inter.user.mention} が /clear を使用しました。"
+        )
+
+        await inter.channel.send(embed=embed, delete_after=10)
+
+        return
+    
+    else:
+        embed = discord.Embed(
+            title="Error",
+            color= 0xff4040,
+            description="あなたはこのコマンドを実行する権限がありません。"
+        )
+        await inter.response.send_message(embed=embed, ephemeral=True)
+        return
 
 # ---------- Run ---------- #
 client.run(config.TOKEN)  # Login

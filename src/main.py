@@ -3,10 +3,10 @@
 #
 # (c) 2022-2023 よね/Yone
 #
-
 import os
 import discord
 from data import config
+
 
 # -------------------- Init -------------------- #
 clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
@@ -24,6 +24,7 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 cmdTree = discord.app_commands.CommandTree(client=client)
 
+
 # -------------------- Main -------------------- #
 #  ---------- Events ---------- #
 # ----- On ready ----- #
@@ -32,6 +33,7 @@ async def on_ready():
     await cmdTree.sync()
     print(">Ready.  Waiting for any command and message\n")
     return
+
 
 # ----- On message ----- #
 @client.event
@@ -60,7 +62,6 @@ async def on_message(message):
             await message.delete()
 
             channel = client.get_channel(config.spamChannels[message.guild.id])
-
             await channel.send(
                 embed=discord.Embed(
                     title="スパム行為を検出",
@@ -85,6 +86,7 @@ async def on_message(message):
             return
 
     return
+
 
 # ----- On member join ----- #
 @client.event
@@ -149,6 +151,7 @@ async def on_member_join(member):
 
     return
 
+
 # ----- On member remove ----- #
 @client.event
 async def on_member_remove(member):
@@ -183,6 +186,7 @@ async def on_raw_reaction_add(reaction):
 
     return
 
+
 # ---------- Commands ---------- #
 @discord.app_commands.guilds(discord.Object(id=1053378444781703339))
 
@@ -200,6 +204,7 @@ async def info(inter: discord.Interaction):
     )
     await inter.response.send_message(embed=embed)
     return
+
 
 # ----- clear ----- #
 @cmdTree.command(
@@ -235,5 +240,7 @@ async def clear(inter: discord.Interaction, target:int):
         await inter.response.send_message(embed=embed, ephemeral=True)
         return
 
+
 # ---------- Run ---------- #
 client.run(config.TOKEN)  # Login
+

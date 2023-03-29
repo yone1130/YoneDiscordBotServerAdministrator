@@ -8,25 +8,20 @@ TOKEN = ""
 
 # Welcome Channels
 welcomeChannels = {
-
 }
 
 # Notification channels when a member joins
 joinedChannels = {
-
 }
 
 # Rule Channels
 ruleChannels = {
-
 }
 
 # Member Role
 memberRoles = {
-
 }
 
 # Notification channels when spam is detected
 spamChannels = {
-
 }

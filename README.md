@@ -6,6 +6,6 @@
 
 ## Usage Technology
 
-#### Langage
+#### Langages
 - Python
 - discord.py

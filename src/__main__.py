@@ -1,8 +1,12 @@
-#
-# __main__.py | Yone Discord Bot Server Administrator
-#
-# (c) 2022-2023 よね/Yone
-#
+"""
+
+__main__.py | Yone Discord Bot Server Administrator
+
+(c) 2022-2023 よね/Yone
+Licensed under the Apache License 2.0
+
+"""
+
 import os
 import discord
 from data import config

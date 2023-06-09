@@ -578,7 +578,7 @@ async def vc_alert_enable(inter: discord.Interaction, target: discord.VoiceChann
 
 
 # ---------- Tasks ---------- #
-@tasks.loop(seconds=10)
+@tasks.loop(seconds=480)
 async def voice_channel_check():
     global voice_check_messages
     dt = datetime.datetime.now()
@@ -588,7 +588,7 @@ async def voice_channel_check():
         join_dt = vc_data[1][1]
         td = dt - join_dt
 
-        if (join_dt is not None) and (td.seconds > 20):
+        if (join_dt is not None) and (td.seconds > 14400):
             channel = client.get_channel(config.voiceAlertChannel[user_attr.guild.id])
 
             if voice_check_messages.get(user_attr.id) is None:

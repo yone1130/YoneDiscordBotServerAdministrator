@@ -28,3 +28,7 @@ memberRoles = {
 # Notification channels when spam is detected
 spamChannels = {
 }
+
+# Voice alert channel
+voiceAlertChannel = {
+}

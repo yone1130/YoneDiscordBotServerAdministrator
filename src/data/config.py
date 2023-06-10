@@ -1,11 +1,16 @@
 """
 
-data/config.py | Yone Discord Bot Server Administrator
+config.py | data | Yone Discord Bot Server Administrator
 
 (c) 2022-2023 よね/Yone
 Licensed under the Apache License 2.0
 
 """
+
+__title__ = "Yone Discord Bot Server Administrator"
+__author__ = "Yone"
+__license__ = "Apache License 2.0"
+__copyright__ = "Copyright 2022-2023 よね/Yone"
 
 TOKEN = ""
 

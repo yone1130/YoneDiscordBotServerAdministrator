@@ -105,7 +105,7 @@ class Commands:
                         dt_Now = datetime.datetime.now()
                         datetime = dt_Now.strftime("%Y%m%d%H%M%S")
 
-                        BotDatabase.insert_gban(
+                        database.insert_gban(
                             target_id=target.id, add_datetime=datetime
                         )
 
@@ -154,7 +154,7 @@ class Commands:
             try:
                 if inter.user.guild_permissions.administrator:
                     try:
-                        data = BotDatabase.get_gban(target=target)
+                        data = database.get_gban(target=target)
 
                     except Exception as error:
                         await inter.response.send_message(
@@ -166,7 +166,7 @@ class Commands:
                         return
 
                     if data:
-                        BotDatabase.delete_gban_user(target_id=target)
+                        database.delete_gban_user(target_id=target)
 
                         await inter.response.send_message(
                             embed=discord.Embed(
@@ -215,7 +215,7 @@ class Commands:
             try:
                 if inter.user.guild_permissions.administrator:
                     try:
-                        data = BotDatabase.get_vc_alert_disable_channels(
+                        data = database.get_vc_alert_disable_channels(
                             target_id=target.id
                         )
 
@@ -229,7 +229,7 @@ class Commands:
                         return
 
                     if (not data) or (data is None):
-                        BotDatabase.insert_vc_alert_disable_channels(
+                        database.insert_vc_alert_disable_channels(
                             target_id=target.id
                         )
 
@@ -280,7 +280,7 @@ class Commands:
             try:
                 if inter.user.guild_permissions.administrator:
                     try:
-                        data = BotDatabase.get_vc_alert_disable_channels(
+                        data = database.get_vc_alert_disable_channels(
                             target_id=target.id
                         )
 
@@ -294,7 +294,7 @@ class Commands:
                         return
 
                     if data:
-                        BotDatabase.delete_vc_alert_disable_channels(
+                        database.delete_vc_alert_disable_channels(
                             target_id=target.id
                         )
 

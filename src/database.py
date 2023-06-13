@@ -71,7 +71,7 @@ class BotDatabase:
         )
         self.save(connect=db_con)
 
-    def delete_gban_user(self, target_id: discord.User.id) -> None:
+    def delete_gban_user(self, *, target_id: discord.User.id) -> None:
         """グローバルBANリストから削除"""
         db_con = self.connect()
         db_cur = self.cursor(connect=db_con)

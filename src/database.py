@@ -55,7 +55,7 @@ class BotDatabase:
         db_con = self.connect()
         db_cur = self.cursor(connect=db_con)
         db_cur.execute(
-            f"SELECT uid, datetime FROM globalBannedList WHERE uid=?", (str(target.id),)
+            f"SELECT uid, datetime FROM globalBannedList WHERE uid=?", (str(target),)
         )
         data = db_cur.fetchall()
         self.save(connect=db_con)

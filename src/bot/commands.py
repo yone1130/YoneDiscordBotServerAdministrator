@@ -156,13 +156,11 @@ class Commands:
                     try:
                         data = BotDatabase.get_gban(target=target)
 
-                    except Exception as e:
+                    except Exception as error:
                         await inter.response.send_message(
-                            embed=discord.Embed(
-                                title="エラーが発生しました",
-                                color=0xFF4040,
-                                description=f"データベースの読み込みに失敗しました。```{e}```",
-                            ).set_footer(text=f"エラーコード: 0x0201"),
+                            embed=EmbedOfException(
+                                err_code=0x0201, text="データベースの読み込みに失敗しました。", error=error
+                            ),
                             ephemeral=True,
                         )
                         return
@@ -221,13 +219,11 @@ class Commands:
                             target_id=target.id
                         )
 
-                    except Exception as e:
+                    except Exception as error:
                         await inter.response.send_message(
-                            embed=discord.Embed(
-                                title="エラーが発生しました",
-                                color=0xFF4040,
-                                description=f"データベースの読み込みに失敗しました。```{e}```",
-                            ).set_footer(text=f"エラーコード: 0x0201"),
+                            embed=EmbedOfException(
+                                err_code=0x0201, text="データベースの読み込みに失敗しました。", error=error
+                            ),
                             ephemeral=True,
                         )
                         return
@@ -288,13 +284,11 @@ class Commands:
                             target_id=target.id
                         )
 
-                    except Exception as e:
+                    except Exception as error:
                         await inter.response.send_message(
-                            embed=discord.Embed(
-                                title="エラーが発生しました",
-                                color=0xFF4040,
-                                description=f"データベースの読み込みに失敗しました。```{e}```",
-                            ).set_footer(text=f"エラーコード: 0x0201"),
+                            embed=EmbedOfException(
+                                err_code=0x0201, text="データベースの読み込みに失敗しました。", error=error
+                            ),
                             ephemeral=True,
                         )
                         return

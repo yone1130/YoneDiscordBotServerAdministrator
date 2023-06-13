@@ -1,5 +1,5 @@
 
-# Yone Discord Bot Administrator
+# Yone Discord Bot Server Administrator
 
 ## About
 サーバー管理用のDiscordBotです。

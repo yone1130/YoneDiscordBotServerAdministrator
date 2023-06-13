@@ -10,22 +10,30 @@ Licensed under the Apache License 2.0
 import discord
 
 
-class UnhandledException:
-    def __init__(self, error: Exception) -> str:
-        message = f"[ERROR] Unhandled exception. ハンドルされない例外が発生しました。\n{error}"
-        print(message)
-        return message
+def UnhandledException(error: Exception) -> None:
+    """ハンドルされない例外をprint"""
+    message = f"[ERROR] Unhandled exception. ハンドルされない例外が発生しました。\n{error}"
+    print(message)
 
 
-class EmbedOfException:
-    def __init__(
-        self, *, errCode: int, text: str = "", error: Exception
-    ) -> discord.Embed:
-        return discord.Embed(
-            title="Error", description=f"{text}\n```{error}```", color=0xF04040
-        ).set_footer(text=f"Error Code: 0x{hex(errCode)}")
+def EmbedOfException(*, err_code: int, text: str = "", error: Exception) -> discord.Embed:
+    """例外表示用のembedを生成
+
+    Args:
+        err_code (int): エラーコード。16進数として取り扱う。0x形式で記述
+        text (str): 表示する説明文
+        error (Exception)
+
+    Returns:
+        discord.Embed: 生成したembed
+    """
+    return discord.Embed(
+        title="Error",
+        description=f"{text}\n```{error}```",
+        color=0xF04040
+    ).set_footer(text=f"Error Code: {hex(err_code)}")
 
 
-class EmbedOfUnhandledException:
-    def __init__(self, *, error: Exception) -> discord.Embed:
-        return EmbedOfException(errCode=0x0101, text="ハンドルされない例外が発生しました。", error=error)
+def EmbedOfUnhandledException(*, error: Exception) -> discord.Embed:
+    """ハンドルされない例外表示用のembedを生成"""
+    return EmbedOfException(errCode=0x0101, text="ハンドルされない例外が発生しました。", error=error)

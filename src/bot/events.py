@@ -8,16 +8,14 @@ Licensed under the Apache License 2.0
 """
 
 import datetime
-import sqlite3
+
 import discord
 from discord.ext import tasks
 
-try:
-    from data import config
-    from errors import *
-    from voice_channel_check import Voice_channel_check
-except ModuleNotFoundError as error:
-    print(f"[ERROR] {error}")
+from data import config
+from database import BotDatabase
+from errors import *
+from voice_channel_check import Voice_channel_check
 
 
 class Events:
@@ -27,8 +25,8 @@ class Events:
         client: discord.Client,
         tasks: tasks,
         command_tree: discord.app_commands.CommandTree,
-        db_cur: sqlite3.Cursor,
         vc_check: Voice_channel_check,
+        voice_check_messages: dict,
     ) -> None:
         # ----- On ready ----- #
         @client.event
@@ -124,10 +122,7 @@ class Events:
 
             # global ban
             try:
-                db_cur.execute(
-                    f"SELECT uid FROM globalBannedList WHERE uid=?", (str(member.id),)
-                )
-                data = db_cur.fetchall()
+                data = BotDatabase.get_gban(target=member.id)
 
             except Exception as e:
                 print(f"[ERROR] {e}")
@@ -228,6 +223,10 @@ class Events:
             global voice_check_messages
 
             if reaction.message_id in [
+                1074994444509642752,
+                1073629279079911505,
+                1055443071866765352,
+                1083296365381169214,
             ]:
                 roles = reaction.member.guild.get_role(
                     config.memberRoles[reaction.member.guild.id]
@@ -246,16 +245,9 @@ class Events:
         # ----- On voice state update ----- #
         @client.event
         async def on_voice_state_update(member, before, after):
-            global vc_check
-            global voice_check_messages
-
             if before.channel is None:
                 try:
-                    db_cur.execute(
-                        f"SELECT channelId FROM vcAlertDisableChannels WHERE channelId=?",
-                        (str(after.channel.id),),
-                    )
-                    data = db_cur.fetchall()
+                    data = BotDatabase.get_vc_alert_disable_channels(target_id=after.channel.id)
 
                 except Exception as e:
                     pass
@@ -269,10 +261,8 @@ class Events:
                 vc_check.remove(member)
                 voice_check_messages.pop(member.id, None)
 
-        # ----- Tasks ----- #
         @tasks.loop(seconds=480)
         async def voice_channel_check():
-            global voice_check_messages
             dt = datetime.datetime.now()
 
             for vc_data in list(vc_check.check_all()):

@@ -7,17 +7,13 @@ Licensed under the Apache License 2.0
 
 """
 
-import datetime
-import sqlite3
 import discord
 from discord.ext import tasks
 
-try:
-    from data import config
-    from errors import *
-    from voice_channel_check import Voice_channel_check
-except ModuleNotFoundError as error:
-    print(f"[ERROR] {error}")
+from data import config
+from database import BotDatabase
+from errors import *
+from voice_channel_check import Voice_channel_check
 
 
 class Commands:
@@ -27,27 +23,28 @@ class Commands:
         client: discord.Client,
         tasks: tasks,
         cmdTree: discord.app_commands.CommandTree,
+        database: BotDatabase,
         vc_check: Voice_channel_check,
-        db_con: sqlite3.Connection,
-        db_cur: sqlite3.Cursor,
     ) -> None:
-        @discord.app_commands.guilds(discord.Object(id=0))
+        @discord.app_commands.guilds(discord.Object(id=config.MAIN_GUILD_ID))
 
         # ----- info ----- #
         @cmdTree.command(name="info", description="Send bot information")
         async def info(inter: discord.Interaction):
             try:
                 embed = discord.Embed(
-                    title="Yone Bot Server Administrator",
+                    title=config.__title__,
                     color=0x40FF40,
-                    description="(c) 2022-2023 よね/Yone\n"
+                    description=f"{config.__copyright__}\n"
                     + "不具合等の連絡は <@892376684093898772> までお願いいたします。",
                 )
                 await inter.response.send_message(embed=embed)
                 return
 
             except Exception as error:
-                UnhandledException(error)
+                await inter.response.send_message(
+                    embed=EmbedOfUnhandledException(error=error), ephemeral=False
+                )
                 return
 
         # ----- clear ----- #
@@ -82,7 +79,9 @@ class Commands:
                     return
 
             except Exception as error:
-                UnhandledException(error)
+                await inter.response.send_message(
+                    embed=EmbedOfUnhandledException(error=error), ephemeral=False
+                )
                 return
 
         # ----- global ban add ----- #
@@ -91,32 +90,24 @@ class Commands:
             try:
                 if inter.user.guild_permissions.administrator:
                     try:
-                        db_cur.execute(
-                            f"SELECT uid, datetime FROM globalBannedList WHERE uid=?",
-                            (str(target.id),),
-                        )
-                        data = db_cur.fetchall()
+                        data = database.get_gban(target=target.id)
 
-                    except Exception as e:
+                    except Exception as error:
                         await inter.response.send_message(
-                            embed=discord.Embed(
-                                title="エラーが発生しました",
-                                color=0xFF4040,
-                                description=f"データベースの読み込みに失敗しました。```{e}```",
-                            ).set_footer(text=f"エラーコード: 0x0201"),
+                            embed=EmbedOfException(
+                                err_code=0x0201, text="データベースの読み込みに失敗しました。", error=error
+                            ),
                             ephemeral=True,
                         )
                         return
 
                     if (not data) or (data is None):
                         dt_Now = datetime.datetime.now()
-                        add_datetime = dt_Now.strftime("%Y%m%d%H%M%S")
+                        datetime = dt_Now.strftime("%Y%m%d%H%M%S")
 
-                        insertData = (str(target.id), add_datetime)
-                        db_cur.execute(
-                            "INSERT INTO globalBannedList VALUES(?, ?)", insertData
+                        BotDatabase.insert_gban(
+                            target_id=target.id, add_datetime=datetime
                         )
-                        db_con.commit()
 
                         await inter.response.send_message(
                             embed=discord.Embed(
@@ -149,7 +140,9 @@ class Commands:
                     return
 
             except Exception as error:
-                UnhandledException(error)
+                await inter.response.send_message(
+                    embed=EmbedOfUnhandledException(error=error), ephemeral=False
+                )
                 return
 
         # ----- global ban remove ----- #
@@ -161,10 +154,7 @@ class Commands:
             try:
                 if inter.user.guild_permissions.administrator:
                     try:
-                        db_cur.execute(
-                            f"SELECT uid FROM globalBannedList WHERE uid=?", (target,)
-                        )
-                        data = db_cur.fetchall()
+                        data = BotDatabase.get_gban(target=target)
 
                     except Exception as e:
                         await inter.response.send_message(
@@ -178,10 +168,7 @@ class Commands:
                         return
 
                     if data:
-                        db_cur.execute(
-                            "DELETE FROM globalBannedList WHERE uid=?", (target,)
-                        )
-                        db_con.commit()
+                        BotDatabase.delete_gban_user(target_id=target)
 
                         await inter.response.send_message(
                             embed=discord.Embed(
@@ -214,7 +201,9 @@ class Commands:
                     return
 
             except Exception as error:
-                UnhandledException(error)
+                await inter.response.send_message(
+                    embed=EmbedOfUnhandledException(error=error), ephemeral=False
+                )
                 return
 
         # ----- Voice channel alert invalid add  ----- #
@@ -228,11 +217,9 @@ class Commands:
             try:
                 if inter.user.guild_permissions.administrator:
                     try:
-                        db_cur.execute(
-                            f"SELECT channelId FROM vcAlertDisableChannels WHERE channelId=?",
-                            (str(target.id),),
+                        data = BotDatabase.get_vc_alert_disable_channels(
+                            target_id=target.id
                         )
-                        data = db_cur.fetchall()
 
                     except Exception as e:
                         await inter.response.send_message(
@@ -246,11 +233,9 @@ class Commands:
                         return
 
                     if (not data) or (data is None):
-                        insertData = (str(target.id),)
-                        db_cur.execute(
-                            "INSERT INTO vcAlertDisableChannels VALUES(?)", insertData
+                        BotDatabase.insert_vc_alert_disable_channels(
+                            target_id=target.id
                         )
-                        db_con.commit()
 
                         await inter.response.send_message(
                             embed=discord.Embed(
@@ -283,7 +268,9 @@ class Commands:
                     return
 
             except Exception as error:
-                UnhandledException(error)
+                await inter.response.send_message(
+                    embed=EmbedOfUnhandledException(error=error), ephemeral=False
+                )
                 return
 
         # ----- Voice channel alert invalid remove ----- #
@@ -297,11 +284,9 @@ class Commands:
             try:
                 if inter.user.guild_permissions.administrator:
                     try:
-                        db_cur.execute(
-                            f"SELECT channelId FROM vcAlertDisableChannels WHERE channelId=?",
-                            (str(target.id),),
+                        data = BotDatabase.get_vc_alert_disable_channels(
+                            target_id=target.id
                         )
-                        data = db_cur.fetchall()
 
                     except Exception as e:
                         await inter.response.send_message(
@@ -315,11 +300,9 @@ class Commands:
                         return
 
                     if data:
-                        db_cur.execute(
-                            "DELETE FROM vcAlertDisableChannels WHERE channelId=?",
-                            (str(target.id),),
+                        BotDatabase.delete_vc_alert_disable_channels(
+                            target_id=target.id
                         )
-                        db_con.commit()
 
                         await inter.response.send_message(
                             embed=discord.Embed(
@@ -352,5 +335,7 @@ class Commands:
                     return
 
             except Exception as error:
-                UnhandledException(error)
+                await inter.response.send_message(
+                    embed=EmbedOfUnhandledException(error=error), ephemeral=False
+                )
                 return

@@ -34,6 +34,9 @@ class Commands:
                     color=0x40FF40,
                     description=f"{config.__copyright__}\n"
                     + "不具合等の連絡は <@892376684093898772> までお願いいたします。",
+                ).add_field(
+                    name="■導入サーバー数",
+                    value=len(client.guilds)
                 )
                 await inter.response.send_message(embed=embed)
                 return

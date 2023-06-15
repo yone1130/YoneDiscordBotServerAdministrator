@@ -348,6 +348,8 @@ class Events:
                 content="通報セッションを終了しました。", delete_after=3
             )
             await interaction.message.delete()
+            self.report_type_value = ""
+            self.report_user_value = ""
             return
 
 

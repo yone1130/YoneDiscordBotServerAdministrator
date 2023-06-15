@@ -43,7 +43,7 @@ class ReportView:
         return discord.ui.View(timeout=120).add_item(
                 discord.ui.Button(
                     style=discord.ButtonStyle.red,
-                    label="送信",
+                    label="通報内容を送信する",
                     custom_id="btn_report_submit"
                 )
             ).add_item(

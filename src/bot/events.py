@@ -1,8 +1,8 @@
 """
 
-__init__.py | bot/events | Yone Discord Bot Server Administrator
+events.py | bot | Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright 2022-2023 よね/Yone
 Licensed under the Apache License 2.0
 
 """
@@ -12,10 +12,13 @@ import datetime
 import discord
 from discord.ext import tasks
 
+from bot.report import Report, ReportView
 from data import config
 from database import BotDatabase
 from errors import *
 from voice_channel_check import Voice_channel_check
+
+from .Modals.report_modal import ReportModal
 
 
 class Events:
@@ -25,10 +28,15 @@ class Events:
         client: discord.Client,
         tasks: tasks,
         command_tree: discord.app_commands.CommandTree,
+        database: BotDatabase,
         vc_check: Voice_channel_check,
         voice_check_messages: dict,
     ) -> None:
-        # ----- On ready ----- #
+        self.client = client
+        self.report_type_value = ""
+        self.report_user_value = ""
+
+
         @client.event
         async def on_ready():
             await command_tree.sync()
@@ -36,7 +44,7 @@ class Events:
             print(">Ready.  Waiting for any command and message\n")
             return
 
-        # ----- On message ----- #
+
         @client.event
         async def on_message(message):
             if message.author.bot:
@@ -84,7 +92,7 @@ class Events:
 
             return
 
-        # ----- On member join ----- #
+
         @client.event
         async def on_member_join(member):
             # log
@@ -122,7 +130,7 @@ class Events:
 
             # global ban
             try:
-                data = BotDatabase.get_gban(target=member.id)
+                data = database.get_gban(target=member.id)
 
             except Exception as e:
                 print(f"[ERROR] {e}")
@@ -195,7 +203,7 @@ class Events:
 
             return
 
-        # ----- On member remove ----- #
+
         @client.event
         async def on_member_remove(member):
             if member.guild.id in config.joinedChannels:
@@ -217,11 +225,9 @@ class Events:
 
             return
 
-        # ----- On reaction add ----- #
+
         @client.event
         async def on_raw_reaction_add(reaction):
-            global voice_check_messages
-
             if reaction.message_id in [
                 1074994444509642752,
                 1073629279079911505,
@@ -242,12 +248,14 @@ class Events:
 
             return
 
-        # ----- On voice state update ----- #
+
         @client.event
         async def on_voice_state_update(member, before, after):
             if before.channel is None:
                 try:
-                    data = BotDatabase.get_vc_alert_disable_channels(target_id=after.channel.id)
+                    data = database.get_vc_alert_disable_channels(
+                        target_id=after.channel.id
+                    )
 
                 except Exception as e:
                     pass
@@ -260,6 +268,21 @@ class Events:
             if after.channel is None:
                 vc_check.remove(member)
                 voice_check_messages.pop(member.id, None)
+
+
+        @client.event
+        async def on_interaction(inter: discord.Interaction):
+            component_type = inter.data.get("component_type")
+
+            if component_type == int(discord.ComponentType.button):
+                await self.on_click_button(interaction=inter)
+            elif component_type == int(discord.ComponentType.select):
+                await self.on_change_select(interaction=inter)
+            elif component_type == int(discord.ComponentType.user_select):
+                await self.on_change_user_select(interaction=inter)
+            else:
+                return
+
 
         @tasks.loop(seconds=480)
         async def voice_channel_check():
@@ -290,3 +313,75 @@ class Events:
                         msg = await channel.send(
                             content=f"{user_attr.mention} 応答がないためボイスチャンネルから自動切断されました。"
                         )
+
+
+    async def on_click_button(self, *, interaction: discord.Interaction) -> None:
+        SELECTS = Report.SELECTS
+        id = interaction.data.get("custom_id")
+        value = self.report_type_value
+        user = self.report_user_value
+
+        if id == "btn_report_submit":
+            if value == "text":
+                await interaction.response.send_modal(ReportModal())
+                return
+            else:
+                if value == "":
+                    await interaction.response.send_message( content="通報する項目を選択してください。", ephemeral=True)
+                    return
+                if user == "":
+                    await interaction.response.send_message( content="通報するユーザーを選択してください。", ephemeral=True)
+                    return
+                await Report.send(
+                    user=interaction.user,
+                    interaction=interaction,
+                    title=SELECTS[value],
+                    content=f"{user.mention} ({user.name})",
+                )
+                await interaction.response.send_message(content="通報内容を送信しました。")
+                self.report_type_value = ""
+                self.report_user_value = ""
+                return
+
+        elif id == "btn_report_exit":
+            await interaction.response.send_message(
+                content="通報セッションを終了しました。", delete_after=3
+            )
+            await interaction.message.delete()
+            return
+
+
+    async def on_change_select(self, *, interaction: discord.Interaction) -> None:
+        SELECTS = Report.SELECTS
+        id = interaction.data.get("custom_id")
+
+        if id == "select_report_type":
+            self.report_type_value = interaction.data.get("values")[0]
+            embed = interaction.message.embeds[0]
+            name = embed.fields[0].name
+            embed.set_field_at(
+                index=0, name=name, value=SELECTS.get(self.report_type_value, None)
+            )
+            await interaction.response.edit_message(embed=embed)
+
+            view = ReportView.make_view()
+            view.add_item(
+                item=discord.ui.UserSelect(
+                    custom_id="userslect_report", placeholder="ユーザーを選択"
+                )
+            )
+
+            if self.report_type_value != "text":
+                await interaction.message.edit(view=view)
+
+
+    async def on_change_user_select(self, *, interaction: discord.Interaction) -> None:
+        id = interaction.data.get("custom_id")
+
+        if id == "userslect_report":
+            user = interaction.data.get("values")[0]
+            self.report_user_value = self.client.get_user(int(user))
+            embed = interaction.message.embeds[0]
+            name = embed.fields[1].name
+            embed.set_field_at(index=1, name=name, value=self.report_user_value.mention)
+            await interaction.response.edit_message(embed=embed)

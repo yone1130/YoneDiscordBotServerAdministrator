@@ -2,7 +2,7 @@
 
 __main__.py | Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright 2022-2023 よね/Yone
 Licensed under the Apache License 2.0
 
 """
@@ -38,25 +38,24 @@ def main():
     client = discord.Client(intents=intents)
     cmdTree = discord.app_commands.CommandTree(client=client)
 
-    db = BotDatabase(config.DATABASE_FILE_PATH)
+    db = BotDatabase(database_file=config.DATABASE_FILE_PATH)
 
     vc_check = Voice_channel_check()
-    voice_check_messages: dict = {}
+    voice_check_messages = {}
 
     Commands(
         client=client,
-        tasks=tasks,
         cmdTree=cmdTree,
         database=db,
-        vc_check=vc_check
     )
 
     Events(
         client=client,
         tasks=tasks,
         command_tree=cmdTree,
+        database=db,
         vc_check=vc_check,
-        voice_check_messages=voice_check_messages
+        voice_check_messages=voice_check_messages,
     )
 
     client.run(config.TOKEN)  # Login

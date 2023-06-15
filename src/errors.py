@@ -2,7 +2,7 @@
 
 errors.py | Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright 2022-2023 よね/Yone
 Licensed under the Apache License 2.0
 
 """
@@ -10,13 +10,18 @@ Licensed under the Apache License 2.0
 import discord
 
 
-def UnhandledException(error: Exception) -> None:
+def UnhandledException(*, error: Exception) -> None:
     """ハンドルされない例外をprint"""
     message = f"[ERROR] Unhandled exception. ハンドルされない例外が発生しました。\n{error}"
     print(message)
 
 
-def EmbedOfException(*, err_code: int, text: str = "", error: Exception) -> discord.Embed:
+def EmbedOfException(
+    *,
+    err_code: int,
+    text: str = "",
+    error: Exception
+) -> discord.Embed:
     """例外表示用のembedを生成
 
     Args:
@@ -36,4 +41,4 @@ def EmbedOfException(*, err_code: int, text: str = "", error: Exception) -> disc
 
 def EmbedOfUnhandledException(*, error: Exception) -> discord.Embed:
     """ハンドルされない例外表示用のembedを生成"""
-    return EmbedOfException(errCode=0x0101, text="ハンドルされない例外が発生しました。", error=error)
+    return EmbedOfException(err_code=0x0201, text="ハンドルされない例外が発生しました。", error=error)

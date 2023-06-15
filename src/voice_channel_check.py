@@ -2,7 +2,7 @@
 
 voice_channel_check.py | Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright 2022-2023 よね/Yone
 Licensed under the Apache License 2.0
 
 """

@@ -1,1 +1,3 @@
+__pycashe__/
+*.pyc
 src/bot-savedata.db

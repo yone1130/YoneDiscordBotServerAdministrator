@@ -2,7 +2,7 @@
 
 config.py | data | Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright 2022-2023 よね/Yone
 Licensed under the Apache License 2.0
 
 """
@@ -14,9 +14,10 @@ __license__ = "Apache License 2.0"
 
 TOKEN = ""
 
+OWNER_USER_ID = 0
 MAIN_GUILD_ID = 0
-
 DATABASE_FILE_PATH = "bot-savedata.db"
+REPORT_POST_CHANNEL = 0
 
 """
 以下サーバーごとのデータ。形式は下記の通り

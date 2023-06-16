@@ -22,15 +22,15 @@ from voice_channel_check import Voice_channel_check
 
 def main():
     if os.name in ("nt", "dos"):
-        os.system("cls")
+        os.system(command="cls")
     else:
-        os.system("clear")
+        os.system(command="clear")
 
     print(
-        f"{config.__title__}\n"
-        + f"{config.__copyright__}\n\n"
-        + f"discord.py  Ver {discord.__version__}\n\n"
-        + f"--------------------\n"
+        f"{config.__title__}\n" +
+        f"{config.__copyright__}\n\n" +
+        f"discord.py  Ver {discord.__version__}\n\n" +
+        f"--------------------\n"
     )
 
     intents = discord.Intents.all()
@@ -38,6 +38,7 @@ def main():
     client = discord.Client(intents=intents)
     cmdTree = discord.app_commands.CommandTree(client=client)
 
+    errors = Errors(client=client)
     db = BotDatabase(database_file=config.DATABASE_FILE_PATH)
 
     vc_check = Voice_channel_check()
@@ -45,12 +46,14 @@ def main():
 
     Commands(
         client=client,
+        errors=errors,
         cmdTree=cmdTree,
         database=db,
     )
 
     Events(
         client=client,
+        errors=errors,
         tasks=tasks,
         command_tree=cmdTree,
         database=db,
@@ -58,7 +61,7 @@ def main():
         voice_check_messages=voice_check_messages,
     )
 
-    client.run(config.TOKEN)  # Login
+    client.run(token=config.TOKEN)  # Login
 
 
 if __name__ == "__main__":

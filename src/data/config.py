@@ -14,6 +14,7 @@ __license__ = "Apache License 2.0"
 
 TOKEN = ""
 
+LOG_CHANNEL_ID = 0
 OWNER_USER_ID = 0
 MAIN_GUILD_ID = 0
 DATABASE_FILE_PATH = "bot-savedata.db"

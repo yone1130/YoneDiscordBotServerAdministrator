@@ -26,6 +26,7 @@ class Events:
         self,
         *,
         client: discord.Client,
+        errors: Errors,
         tasks: tasks,
         command_tree: discord.app_commands.CommandTree,
         database: BotDatabase,
@@ -46,47 +47,52 @@ class Events:
 
 
         @client.event
-        async def on_message(message):
+        async def on_message(message: discord.Message):
             if message.author.bot:
                 return
 
-            if message.author.guild_permissions.administrator:
-                pass
-
             else:
+                num_mentions = len(message.mentions)
+
                 if client.user in message.mentions:
                     await message.reply(
-                        embed=discord.Embed(
-                            title="Pong", description="Hi", color=0x40FF40
-                        )
+                        content="サポートが必要な場合はプロフィールにある招待リンクからサポートサーバーへ参加してください。/info コマンドを使用して、このBotの情報を表示します。\n" +
+                                "Hi. Do you need help? You can join this bot's support server. Please check the invite link on my profile. And type the /info command to see information about this bot."
                     )
                     return
 
-                if len(message.mentions) >= 5:
+                if num_mentions >= 5 and (not message.author.guild_permissions.administrator):
+                    log_channel = client.get_channel(config.spamChannels[message.guild.id])
+
+                    embed = discord.Embed(
+                        title="⚠警告⚠",
+                        description="大量メンション行為は禁止です。\n" +
+                                    "該当メッセージは削除されます。\n",
+                        color=0xFF4040,
+                    ).set_footer(text="警告種別コード: 1")
+
+                    embed_of_log = discord.Embed(
+                        title="スパム行為を検出",
+                        description="スパム行為 大量メンション を検出したため、\n" +
+                                    "該当メッセージを削除しました。\n",
+                        color=0xFFFF40,
+                    ).add_field(
+                        name="チャンネル",
+                        value=message.channel.mention
+                    ).add_field(
+                        name="メッセージ送信者",
+                        value=message.author.mention
+                    ).add_field(
+                        name="メッセージ内容",
+                        value=f"{message.content}"
+                    )
+
                     await message.reply(
-                        embed=discord.Embed(
-                            title="⚠警告⚠",
-                            description="大量メンション行為は禁止です。\n"
-                            + "該当メッセージは削除されます。\n"
-                            + "※この警告メッセージは１５秒後に自動削除します。",
-                            color=0xFF4040,
-                        ).set_footer(text="警告種別コード: 0x0101"),
+                        embed=embed,
                         delete_after=15,
                     )
                     await message.delete()
-
-                    channel = client.get_channel(config.spamChannels[message.guild.id])
-                    await channel.send(
-                        embed=discord.Embed(
-                            title="スパム行為を検出",
-                            description="スパム行為 大量メンション を検出したため、\n"
-                            + "該当メッセージを削除しました。\n",
-                            color=0xFFFF40,
-                        )
-                        .add_field(name="チャンネル", value=message.channel.mention)
-                        .add_field(name="メッセージ送信者", value=message.author.mention)
-                        .add_field(name="メッセージ内容", value=f"{message.content}")
-                    )
+                    await log_channel.send(embed=embed_of_log)
 
                     return
 
@@ -100,31 +106,32 @@ class Events:
                 embed = discord.Embed(
                     title=f"{member.name} が参加しました。",
                     color=0x40FF40,
-                )
-                embed.set_thumbnail(url=member.avatar)
+                ).add_field(
+                    name="ユーザー名",
+                    value=member.mention
+                ).set_thumbnail(url=member.avatar)
 
                 if member.bot:
                     embed.description = "これはBotアカウントです。"
-
                 else:
                     embed.description = f"{member.guild.name} へようこそ！"
 
+                account_created_at_year = str(member.created_at.year)
+                account_created_at_month = str(member.created_at.month)
+                account_created_at_day = str(member.created_at.day)
+                account_created_at_hour = str(member.created_at.hour)
+                account_created_at_minute = str(member.created_at.minute)
+                account_created_at_second = str(member.created_at.second)
+
                 created_at = (
-                    str(member.created_at.year)
-                    + "/"
-                    + str(member.created_at.month).zfill(2)
-                    + "/"
-                    + str(member.created_at.day).zfill(2)
-                    + " "
-                    + str(member.created_at.hour).zfill(2)
-                    + ":"
-                    + str(member.created_at.minute).zfill(2)
-                    + ":"
-                    + str(member.created_at.second).zfill(2)
+                    f"{account_created_at_year}/{account_created_at_month}/{account_created_at_day}" +
+                    f"{account_created_at_hour}:{account_created_at_minute}:{account_created_at_second}"
                 )
 
-                embed.add_field(name="ユーザー名", value=member.mention)
-                embed.add_field(name="アカウントの作成日時", value=created_at)
+                embed.add_field(
+                    name="アカウントの作成日時",
+                    value=created_at
+                )
                 channel = client.get_channel(config.joinedChannels[member.guild.id])
                 await channel.send(embed=embed)
 
@@ -132,8 +139,8 @@ class Events:
             try:
                 data = database.get_gban(target=member.id)
 
-            except Exception as e:
-                print(f"[ERROR] {e}")
+            except Exception as error:
+                errors.exception(error=error)
                 return
 
             if data:
@@ -145,43 +152,39 @@ class Events:
                             title="Global Ban",
                             description=f"{member.name} はグローバルBANリストに登録されているため、BANされました。",
                             color=0x40FF40,
-                        )
-                        embed.set_thumbnail(url=member.avatar)
-                        channel = client.get_channel(
-                            config.joinedChannels[member.guild.id]
-                        )
+                        ).set_thumbnail(url=member.avatar)
+
+                        channel = client.get_channel(config.joinedChannels[member.guild.id])
+
                         await channel.send(embed=embed)
+                        return
 
-                    except:
-                        pass
+                    except Exception as error:
+                        errors.exception(error=error)
+                        return
 
-                except Exception as e:
+                except Exception as error:
                     try:
-                        embed = EmbedOfException(
-                            errCode=0x0301,
+                        embed = errors.embed_of_exception(
+                            err_code=0x0301,
                             text=f"{member.name} はグローバルBANリストに登録されているため、BANを試みましたが失敗しました。",
-                            error=e,
-                        )
-                        embed.set_thumbnail(url=member.avatar)
-                        channel = client.get_channel(
-                            config.joinedChannels[member.guild.id]
-                        )
+                            error=error,
+                        ).set_thumbnail(url=member.avatar)
+
+                        channel = client.get_channel(config.joinedChannels[member.guild.id])
                         await channel.send(embed=embed)
 
-                    except:
-                        pass
+                    except Exception as error:
+                        errors.exception(error=error)
 
             # welcome
             if member.bot == False:
                 if member.guild.id in config.welcomeChannels:
-                    channel = client.get_channel(
-                        config.welcomeChannels[member.guild.id]
-                    )
-                    ruleChannel = client.get_channel(
-                        config.ruleChannels[member.guild.id]
-                    )
+                    channel = client.get_channel(config.welcomeChannels[member.guild.id])
+                    ruleChannel = client.get_channel(config.ruleChannels[member.guild.id])
 
-                    if member.guild.id in {1053378444781703339}:  # My server
+                    guilds = {1053378444781703339}
+                    if member.guild.id in guilds:  # My server
                         await channel.send(
                             content=f"{member.mention} さん。\n\n"
                             + f"ようこそ {member.guild.name} へ！\n"
@@ -210,16 +213,15 @@ class Events:
                 embed = discord.Embed(
                     title=f"{member.name} が脱退しました。",
                     color=0x40FF40,
-                )
-                embed.set_thumbnail(url=member.avatar)
+                )\
+                .set_thumbnail(url=member.avatar)\
+                .add_field(name="ユーザー名", value=member.mention)\
 
                 if member.bot == True:
                     embed.description = "これはBotアカウントです。"
-
                 else:
                     embed.description = f"参加ありがとうございました。"
 
-                embed.add_field(name="ユーザー名", value=member.mention)
                 channel = client.get_channel(config.joinedChannels[member.guild.id])
                 await channel.send(embed=embed)
 
@@ -228,19 +230,24 @@ class Events:
 
         @client.event
         async def on_raw_reaction_add(reaction):
-            if reaction.message_id in [
+            id_of_messages = [
                 1074994444509642752,
                 1073629279079911505,
                 1055443071866765352,
                 1083296365381169214,
-            ]:
-                roles = reaction.member.guild.get_role(
-                    config.memberRoles[reaction.member.guild.id]
+            ]
+
+            if reaction.message_id in id_of_messages:
+                roles = reaction.member.guild.get_role(config.memberRoles[reaction.member.guild.id])
+                await reaction.member.add_roles(
+                    roles,
+                    reason="ガイドラインに同意しました。"
                 )
-                await reaction.member.add_roles(roles, reason="ガイドラインに同意しました。")
 
             # Voice channel check message
-            for message in list(voice_check_messages.values()):
+            messages_of_vc_check = list(voice_check_messages.values())
+
+            for message in messages_of_vc_check:
                 if reaction.message_id == message.id:
                     vc_check.add(reaction.member)
                     voice_check_messages.pop(reaction.member.id)
@@ -250,24 +257,33 @@ class Events:
 
 
         @client.event
-        async def on_voice_state_update(member, before, after):
+        async def on_voice_state_update(
+            member,
+            before,
+            after
+        ):
             if before.channel is None:
                 try:
-                    data = database.get_vc_alert_disable_channels(
-                        target_id=after.channel.id
-                    )
+                    data = database.get_vc_alert_disable_channels(target=after.channel.id)
 
-                except Exception as e:
-                    pass
+                except Exception as error:
+                    errors.exception(error=error)
+                    return
 
                 if data:
                     pass
                 else:
                     vc_check.add(member)
 
+                return
+
             if after.channel is None:
                 vc_check.remove(member)
-                voice_check_messages.pop(member.id, None)
+                voice_check_messages.pop(
+                    member.id,
+                    None
+                )
+                return
 
 
         @client.event
@@ -276,10 +292,13 @@ class Events:
 
             if component_type == int(discord.ComponentType.button):
                 await self.on_click_button(interaction=inter)
+
             elif component_type == int(discord.ComponentType.select):
                 await self.on_change_select(interaction=inter)
+
             elif component_type == int(discord.ComponentType.user_select):
                 await self.on_change_user_select(interaction=inter)
+
             else:
                 return
 
@@ -294,15 +313,13 @@ class Events:
                 td = dt - join_dt
 
                 if (join_dt is not None) and (td.seconds > 14400):
-                    channel = client.get_channel(
-                        config.voiceAlertChannel[user_attr.guild.id]
-                    )
+                    channel = client.get_channel(config.voiceAlertChannel[user_attr.guild.id])
 
                     if voice_check_messages.get(user_attr.id) is None:
                         msg = await channel.send(
-                            content=f"{user_attr.mention} ボイスチャンネルに４時間以上参加しています。\n"
-                            + "通話を続ける場合は ✅ をリアクションしてください。\n"
-                            + "応答がない場合には10分以内に切断されます。"
+                            content=f"{user_attr.mention} ボイスチャンネルに４時間以上参加しています。\n" +
+                                     "通話を続ける場合は ✅ をリアクションしてください。\n" +
+                                     "応答がない場合には10分以内に切断されます。"
                         )
                         await msg.add_reaction("✅")
 
@@ -310,12 +327,14 @@ class Events:
 
                     else:
                         await user_attr.move_to(None, reason="応答なしのため自動切断しました。")
-                        msg = await channel.send(
-                            content=f"{user_attr.mention} 応答がないためボイスチャンネルから自動切断されました。"
-                        )
+                        msg = await channel.send(content=f"{user_attr.mention} 応答がないためボイスチャンネルから自動切断されました。")
 
 
-    async def on_click_button(self, *, interaction: discord.Interaction) -> None:
+    async def on_click_button(
+        self,
+        *,
+        interaction: discord.Interaction
+    ) -> None:
         SELECTS = Report.SELECTS
         id = interaction.data.get("custom_id")
         value = self.report_type_value
@@ -323,15 +342,24 @@ class Events:
 
         if id == "btn_report_submit":
             if value == "text":
-                await interaction.response.send_modal(ReportModal())
+                modal = ReportModal()
+                await interaction.response.send_modal(modal=modal)
                 return
             else:
                 if value == "":
-                    await interaction.response.send_message( content="通報する項目を選択してください。", ephemeral=True)
+                    await interaction.response.send_message(
+                        content="通報する項目を選択してください。",
+                        ephemeral=True
+                    )
                     return
+
                 if user == "":
-                    await interaction.response.send_message( content="通報するユーザーを選択してください。", ephemeral=True)
+                    await interaction.response.send_message(
+                        content="通報するユーザーを選択してください。",
+                        ephemeral=True
+                    )
                     return
+
                 await Report.send(
                     user=interaction.user,
                     interaction=interaction,
@@ -345,7 +373,8 @@ class Events:
 
         elif id == "btn_report_exit":
             await interaction.response.send_message(
-                content="通報セッションを終了しました。", delete_after=3
+                content="通報セッションを終了しました。",
+                delete_after=3
             )
             await interaction.message.delete()
             self.report_type_value = ""
@@ -353,7 +382,11 @@ class Events:
             return
 
 
-    async def on_change_select(self, *, interaction: discord.Interaction) -> None:
+    async def on_change_select(
+        self,
+        *,
+        interaction: discord.Interaction
+    ) -> None:
         SELECTS = Report.SELECTS
         id = interaction.data.get("custom_id")
 
@@ -362,22 +395,27 @@ class Events:
             embed = interaction.message.embeds[0]
             name = embed.fields[0].name
             embed.set_field_at(
-                index=0, name=name, value=SELECTS.get(self.report_type_value, None)
+                index=0,
+                name=name,
+                value=SELECTS.get(self.report_type_value, None)
             )
             await interaction.response.edit_message(embed=embed)
 
-            view = ReportView.make_view()
-            view.add_item(
-                item=discord.ui.UserSelect(
-                    custom_id="userslect_report", placeholder="ユーザーを選択"
-                )
+            view_items = discord.ui.UserSelect(
+                custom_id="userslect_report",
+                placeholder="ユーザーを選択"
             )
+            view = ReportView.make_view().add_item(item=view_items)
 
             if self.report_type_value != "text":
                 await interaction.message.edit(view=view)
 
 
-    async def on_change_user_select(self, *, interaction: discord.Interaction) -> None:
+    async def on_change_user_select(
+        self,
+        *,
+        interaction: discord.Interaction
+    ) -> None:
         id = interaction.data.get("custom_id")
 
         if id == "userslect_report":
@@ -385,5 +423,11 @@ class Events:
             self.report_user_value = self.client.get_user(int(user))
             embed = interaction.message.embeds[0]
             name = embed.fields[1].name
-            embed.set_field_at(index=1, name=name, value=self.report_user_value.mention)
+
+            embed.set_field_at(
+                index=1,
+                name=name,
+                value=self.report_user_value.mention
+            )
+
             await interaction.response.edit_message(embed=embed)

@@ -2,14 +2,14 @@
 
 config.py | data | Yone Discord Bot Server Administrator
 
-Copyright 2022-2023 よね/Yone
+Copyright (c) 2022-2023 よね/Yone
 Licensed under the Apache License 2.0
 
 """
 
 __title__ = "Yone Discord Bot Server Administrator"
 __author__ = "よね/Yone"
-__copyright__ = "Copyright 2022-2023 よね/Yone"
+__copyright__ = "Copyright (c) 2022-2023 よね/Yone"
 __license__ = "Apache License 2.0"
 
 TOKEN = ""

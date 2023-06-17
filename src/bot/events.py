@@ -40,9 +40,10 @@ class Events:
 
         @client.event
         async def on_ready():
-            await command_tree.sync()
+            commands = await command_tree.sync()
             voice_channel_check.start()
-            print(">Ready.  Waiting for any command and message\n")
+            print("> Ready.  Waiting for any command and message\n")
+            print(f"> {len(commands)} command(s) has synced.")
             return
 
 

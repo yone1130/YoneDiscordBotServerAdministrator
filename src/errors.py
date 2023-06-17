@@ -18,7 +18,7 @@ class Errors:
         client: discord.Client
     ) -> None:
         self.client = client
-        self.log_channel = client.get_channel(config.LOG_CHANNEL_ID)
+        self.log_channel = client.get_channel(config.DISCORD_BOT_DATA["logChannelId"])
 
 
     def exception(

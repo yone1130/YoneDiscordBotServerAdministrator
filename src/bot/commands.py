@@ -26,7 +26,7 @@ class Commands:
     ) -> None:
         self.client = client
 
-        @discord.app_commands.guilds(discord.Object(id=config.MAIN_GUILD_ID))
+        @discord.app_commands.guilds(discord.Object(id=config.DISCORD_BOT_DATA["mainGuildId"]))
 
         @cmdTree.command(
             name="info",
@@ -108,6 +108,40 @@ class Commands:
                         ephemeral=True,
                     )
                     return
+
+            except Exception as error:
+                errors.exception_log_message_send(error=error)
+
+                embed = errors.embed_of_unhandled_exception(error=error)
+                await inter.response.send_message(
+                    embed=embed,
+                    ephemeral=False
+                )
+                return
+
+
+        @cmdTree.command(
+            name="guilds",
+            description="Send number of this bot joining servers."
+        )
+        async def guilds(inter: discord.Interaction):
+            try:
+                num_servers = len(client.guilds)
+                embed = discord.Embed(
+                    title=f"{config.__title__}",
+                    description=f"導入サーバー数: {num_servers}",
+                    color=0x40f040
+                )
+                
+                for guild in client.guilds:
+                    embed.add_field(
+                        name=guild.name,
+                        value=f"オーナー: {guild.owner.mention} ({guild.owner.name})"
+                    )
+
+                await inter.response.send_message(embed=embed)
+
+                return
 
             except Exception as error:
                 errors.exception_log_message_send(error=error)

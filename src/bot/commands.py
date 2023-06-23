@@ -13,6 +13,7 @@ from bot.report import ReportView
 from data import config
 from database import BotDatabase
 from errors import *
+from bot.voice.voice_client import VoiceClient
 
 
 class Commands:
@@ -26,12 +27,10 @@ class Commands:
     ) -> None:
         self.client = client
 
-        @discord.app_commands.guilds(discord.Object(id=config.DISCORD_BOT_DATA["mainGuildId"]))
-
-        @cmdTree.command(
-            name="info",
-            description="Send bot information."
+        @discord.app_commands.guilds(
+            discord.Object(id=config.DISCORD_BOT_DATA["mainGuildId"])
         )
+        @cmdTree.command(name="info", description="Send bot information.")
         async def info(inter: discord.Interaction):
             try:
                 num_servers = len(client.guilds)
@@ -40,11 +39,8 @@ class Commands:
                     title=config.__title__,
                     color=0x40FF40,
                     description=f"{config.__copyright__}\n"
-                                + "不具合等の連絡は <@892376684093898772> までお願いいたします。"
-                ).add_field(
-                    name="■導入サーバー数",
-                    value=num_servers
-                )
+                    + "不具合等の連絡は <@892376684093898772> までお願いいたします。",
+                ).add_field(name="■導入サーバー数", value=num_servers)
 
                 await inter.response.send_message(embed=embed)
                 return
@@ -53,22 +49,12 @@ class Commands:
                 errors.exception_log_message_send(error=error)
 
                 embed = errors.embed_of_unhandled_exception(error=error)
-                await inter.response.send_message(
-                    embed=embed,
-                    ephemeral=False
-                )
+                await inter.response.send_message(embed=embed, ephemeral=False)
                 return
 
-
-        @cmdTree.command(
-            name="clear",
-            description="Delete message(s)."
-        )
+        @cmdTree.command(name="clear", description="Delete message(s).")
         @discord.app_commands.describe(target="削除するメッセージ数")
-        async def clear(
-            inter: discord.Interaction,
-            target: int
-        ):
+        async def clear(inter: discord.Interaction, target: int):
             try:
                 if inter.user.guild_permissions.administrator:
                     await inter.response.send_message(content="Please wait while...")
@@ -76,8 +62,7 @@ class Commands:
                     purge_limit = target + 1
 
                     deleted = await inter.channel.purge(
-                        limit=purge_limit,
-                        reason=f"{inter.user.name} が /clear を使用しました。"
+                        limit=purge_limit, reason=f"{inter.user.name} が /clear を使用しました。"
                     )
 
                     num_of_deleted = len(deleted)
@@ -86,7 +71,7 @@ class Commands:
                         title="Deleted messages",
                         color=0x40FF40,
                         description=f"{num_of_deleted}個のメッセージを削除しました。\n"
-                                    + f"{inter.user.mention} が /clear を使用しました。",
+                        + f"{inter.user.mention} が /clear を使用しました。",
                     )
 
                     await inter.channel.send(
@@ -100,7 +85,7 @@ class Commands:
                     embed = discord.Embed(
                         title="Error",
                         color=0xFF4040,
-                        description="あなたはこのコマンドを実行する権限がありません。",
+                        description="あなたはこのコマンドを実行する権限がありません。\nYou are not authorized to use this command.",
                     )
 
                     await inter.response.send_message(
@@ -113,30 +98,25 @@ class Commands:
                 errors.exception_log_message_send(error=error)
 
                 embed = errors.embed_of_unhandled_exception(error=error)
-                await inter.response.send_message(
-                    embed=embed,
-                    ephemeral=False
-                )
+                await inter.response.send_message(embed=embed, ephemeral=False)
                 return
 
-
         @cmdTree.command(
-            name="guilds",
-            description="Send number of this bot joining servers."
+            name="guilds", description="Send number of this bot joining servers."
         )
         async def guilds(inter: discord.Interaction):
             try:
                 num_servers = len(client.guilds)
                 embed = discord.Embed(
                     title=f"{config.__title__}",
-                    description=f"導入サーバー数: {num_servers}",
-                    color=0x40f040
+                    description=f"導入サーバー数: {num_servers}\n",
+                    color=0x40F040,
                 )
-                
+
                 for guild in client.guilds:
-                    embed.add_field(
-                        name=guild.name,
-                        value=f"オーナー: {guild.owner.mention} ({guild.owner.name})"
+                    embed.description = (
+                        embed.description
+                        + f"\n- {guild.name}\nオーナー: {guild.owner.mention} ({guild.owner.name})"
                     )
 
                 await inter.response.send_message(embed=embed)
@@ -147,22 +127,12 @@ class Commands:
                 errors.exception_log_message_send(error=error)
 
                 embed = errors.embed_of_unhandled_exception(error=error)
-                await inter.response.send_message(
-                    embed=embed,
-                    ephemeral=False
-                )
+                await inter.response.send_message(embed=embed, ephemeral=False)
                 return
 
-
-        @cmdTree.command(
-            name="gban-add",
-            description="User add to global banned list."
-        )
+        @cmdTree.command(name="gban-add", description="User add to global banned list.")
         @discord.app_commands.describe(target="追加するユーザー")
-        async def gban_add(
-            inter: discord.Interaction,
-            target: discord.Member
-        ):
+        async def gban_add(inter: discord.Interaction, target: discord.Member):
             import datetime
 
             try:
@@ -174,9 +144,7 @@ class Commands:
                         errors.exception_log_message_send(error=error)
 
                         embed = errors.embed_of_exception(
-                            err_code=0x0202,
-                            text="データベースの読み込みに失敗しました。",
-                            error=error
+                            err_code=0x0202, text="データベースの読み込みに失敗しました。", error=error
                         )
 
                         await inter.response.send_message(
@@ -196,10 +164,7 @@ class Commands:
                             description=f"{target.mention} をGlobal Bannedリストに登録しました。",
                         )
 
-                        database.insert_gban(
-                            target=target.id,
-                            add_datetime=dt_str
-                        )
+                        database.insert_gban(target=target.id, add_datetime=dt_str)
 
                         await inter.response.send_message(
                             embed=embed_of_result,
@@ -237,22 +202,14 @@ class Commands:
                 errors.exception_log_message_send(error=error)
 
                 embed = errors.embed_of_unhandled_exception(error=error)
-                await inter.response.send_message(
-                    embed=embed,
-                    ephemeral=False
-                )
+                await inter.response.send_message(embed=embed, ephemeral=False)
                 return
 
-
         @cmdTree.command(
-            name="gban-rmv",
-            description="User remove from global banned list."
+            name="gban-rmv", description="User remove from global banned list."
         )
         @discord.app_commands.describe(target="リストから削除するユーザーのID")
-        async def gban_rmv(
-            inter: discord.Interaction,
-            target: str
-        ):
+        async def gban_rmv(inter: discord.Interaction, target: str):
             try:
                 if inter.user.guild_permissions.administrator:
                     try:
@@ -262,9 +219,7 @@ class Commands:
                         errors.exception_log_message_send(error=error)
 
                         embed = errors.embed_of_exception(
-                            err_code=0x0202,
-                            text="データベースの読み込みに失敗しました。",
-                            error=error
+                            err_code=0x0202, text="データベースの読み込みに失敗しました。", error=error
                         )
 
                         await inter.response.send_message(
@@ -320,20 +275,15 @@ class Commands:
                 errors.exception_log_message_send(error=error)
 
                 embed = errors.embed_of_unhandled_exception(error=error)
-                await inter.response.send_message(
-                    embed=embed,
-                    ephemeral=False
-                )
+                await inter.response.send_message(embed=embed, ephemeral=False)
                 return
-
 
         @cmdTree.command(
             name="vc-alert-disable",
             description="Voice channel long time alert to disable.",
         )
         async def vc_alert_disable(
-            inter: discord.Interaction,
-            target: discord.VoiceChannel
+            inter: discord.Interaction, target: discord.VoiceChannel
         ):
             try:
                 if inter.user.guild_permissions.administrator:
@@ -344,9 +294,7 @@ class Commands:
                         errors.exception_log_message_send(error=errors)
 
                         embed = errors.embed_of_exception(
-                            err_code=0x0202,
-                            text="データベースの読み込みに失敗しました。",
-                            error=error
+                            err_code=0x0202, text="データベースの読み込みに失敗しました。", error=error
                         )
 
                         await inter.response.send_message(
@@ -402,20 +350,15 @@ class Commands:
                 errors.exception_log_message_send(error=error)
 
                 embed = errors.embed_of_unhandled_exception(error=error)
-                await inter.response.send_message(
-                    embed=embed,
-                    ephemeral=False
-                )
+                await inter.response.send_message(embed=embed, ephemeral=False)
                 return
-
 
         @cmdTree.command(
             name="vc-alert-enable",
             description="Voice channel long time alert to enable.",
         )
         async def vc_alert_enable(
-            inter: discord.Interaction,
-            target: discord.VoiceChannel
+            inter: discord.Interaction, target: discord.VoiceChannel
         ):
             try:
                 if inter.user.guild_permissions.administrator:
@@ -472,17 +415,10 @@ class Commands:
 
                 embed = errors.embed_of_unhandled_exception(error=error)
 
-                await inter.response.send_message(
-                    embed=embed,
-                    ephemeral=False
-                )
+                await inter.response.send_message(embed=embed, ephemeral=False)
                 return
 
-
-        @cmdTree.command(
-            name="report",
-            description="Report anything."
-        )
+        @cmdTree.command(name="report", description="Report anything.")
         async def report(inter: discord.Interaction):
             try:
                 await inter.response.send_message(
@@ -500,9 +436,17 @@ class Commands:
                 errors.exception_log_message_send(error=error)
 
                 embed = errors.embed_of_unhandled_exception(error=error)
-                await inter.response.send_message(
-                    embed=embed,
-                    ephemeral=False
-                )
+                await inter.response.send_message(embed=embed, ephemeral=False)
                 return
 
+        @cmdTree.command(name="join", description="Join voice channel.")
+        async def join(inter: discord.Interaction, channel: discord.VoiceChannel):
+            try:
+                voice_client = channel.connect(cls=VoiceClient)
+
+            except Exception as error:
+                errors.exception_log_message_send(error=error)
+
+                embed = errors.embed_of_unhandled_exception(error=error)
+                await inter.response.send_message(embed=embed, ephemeral=False)
+                return

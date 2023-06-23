@@ -13,18 +13,17 @@ from discord.ext import tasks
 
 
 class YoneDiscordBotServerAdministrator:
-    CONFIG_FILE_PATH = "./src/data/config.py"
-
+    CONFIG_FILE_PATH = "data/config.py"
 
     def __init__(self) -> None:
         try:
             self.clear_console()
-            self.check_files()
+            self.import_modules()
 
             print(
-                f"{self.config.__title__}\n" +
-                f"{self.config.__copyright__}\n\n" +
-                f"discord.py  Ver {discord.__version__}\n\n" +
+                f"{self.config.__title__}\n"
+                f"{self.config.__copyright__}\n\n"
+                f"discord.py  Ver {discord.__version__}\n\n"
                 f"--------------------\n"
             )
 
@@ -37,21 +36,22 @@ class YoneDiscordBotServerAdministrator:
                 self.error(
                     error_code=0x0203,
                     text="Discord client initialisation has failed.",
-                    error=error
+                    error=error,
                 )
                 raise error
 
             try:
                 self.errors = self.Errors(client=client)
-                db = self.BotDatabase(database_file=self.config.DISCORD_BOT_DATA["databaseFilePath"])
+                db = self.BotDatabase(
+                    database_file=self.config.DISCORD_BOT_DATA["databaseFilePath"]
+                )
                 vc_check = self.Voice_channel_check()
                 voice_check_messages = {}
-            
             except Exception as error:
                 self.error(
                     error_code=0x0204,
                     text="Discord client initialisation has failed.",
-                    error=error
+                    error=error,
                 )
                 raise error
 
@@ -66,7 +66,7 @@ class YoneDiscordBotServerAdministrator:
                 self.error(
                     error_code=0x0205,
                     text="Discord commands object initialisation has failed.",
-                    error=error
+                    error=error,
                 )
 
             try:
@@ -83,7 +83,7 @@ class YoneDiscordBotServerAdministrator:
                 self.error(
                     error_code=0x0206,
                     text="Discord events object initialisation has failed.",
-                    error=error
+                    error=error,
                 )
 
             client.run(token=self.config.DISCORD_BOT_DATA["token"])  # Login
@@ -92,11 +92,8 @@ class YoneDiscordBotServerAdministrator:
 
         except Exception as error:
             self.error(
-                error_code=0x0202,
-                text="Unhandled exception has occurred.",
-                error=error
+                error_code=0x0202, text="Unhandled exception has occurred.", error=error
             )
-
 
     def clear_console(self) -> int:
         if os.name in ("nt", "dos"):
@@ -104,10 +101,10 @@ class YoneDiscordBotServerAdministrator:
         else:
             return os.system(command="clear")
 
-
-    def check_files(self) -> None:
+    def import_modules(self) -> None:
         if os.path.exists(self.CONFIG_FILE_PATH):
             from data import config
+
             self.config = config
         else:
             self.error_file_not_found(self.CONFIG_FILE_PATH)
@@ -130,7 +127,6 @@ class YoneDiscordBotServerAdministrator:
 
         return
 
-
     def error_file_not_found(self, file_path):
         print(
             f"\n"
@@ -138,24 +134,17 @@ class YoneDiscordBotServerAdministrator:
             f"File not found.\n"
             f"The {file_path} required for this bot start-up has not been found."
             f"Error code: {hex(0x0201)}\n",
-            end="\n\n"
+            end="\n\n",
         )
         exit()
 
-
-    def error(
-        self,
-        *,
-        error_code: int,
-        text: str,
-        error: Exception
-    ) -> None:
+    def error(self, *, error_code: int, text: str, error: Exception) -> None:
         print(
-            f"[ERROR]\n" +
-            f"Error code: {hex(error_code)}\n" +
-            f"{text}\n" +
+            f"[ERROR]\n"
+            f"Error code: {hex(error_code)}\n"
+            f"{text}\n"
             f"Exception: {error}",
-            end="\n\n"
+            end="\n\n",
         )
         raise error
 

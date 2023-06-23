@@ -14,19 +14,19 @@
 
 ## How to Use
 
-1. 必要なモジュールをインストール
+1. 必要なモジュールをインストールする
 
-[./requirements.txt](https://github.com/yone1130/YoneDiscordBotServerAdministrator/blob/main/requirements.txt) に記述しているモジュールが不足している場合は、以下のコマンドを使用してインストールする。
+[./requirements.txt](https://github.com/yone1130/YoneDiscordBotServerAdministrator/blob/main/requirements.txt) に記述しているモジュールが不足している場合は、以下のコマンドを使用してインストールをしてください。
 
 ```
 $ pip install -r requirements.txt
 ```
 
-2. Configを設定
+2. Configを設定する
 
-[./src/data/config.py](https://github.com/yone1130/YoneDiscordBotServerAdministrator/blob/main/src/data/config.py) の `TOKEN`, `LOG_CHANNEL_ID`, `OWNER_USER_ID`, `MAIN_GUILD_ID`, `DATABASE_FILE_PATH`, `REPORT_POST_CHANNEL` に任意の値を指定する。これらが正しく指定されていない場合は動作しない。必要に応じて、その他の定数も指定する。
+[./src/data/config.py](https://github.com/yone1130/YoneDiscordBotServerAdministrator/blob/main/src/data/config.py) の `TOKEN`, `LOG_CHANNEL_ID`, `OWNER_USER_ID`, `MAIN_GUILD_ID`, `DATABASE_FILE_PATH`, `REPORT_POST_CHANNEL` に任意の値を指定してください。これらが正しく指定されていない場合は動作しません。必要に応じて、その他の定数も指定してください。
 
-3. プロジェクトを実行
+3. プロジェクトを実行する
 
 ```
 $ python -m YoneDiscordBotServerAdministrator

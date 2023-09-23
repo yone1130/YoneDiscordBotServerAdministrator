@@ -2,7 +2,8 @@
 
 __main__.py | Yone Discord Bot Server Administrator
 
-Copyright (c) 2022-2023 よね/Yone
+(c) 2022-2023 よね/Yone
+
 Licensed under the Apache License 2.0
 
 """

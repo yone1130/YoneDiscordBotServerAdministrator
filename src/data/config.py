@@ -2,14 +2,15 @@
 
 config.py | data | Yone Discord Bot Server Administrator
 
-Copyright (c) 2022-2023 よね/Yone
+(c) 2022-2023 よね/Yone
+
 Licensed under the Apache License 2.0
 
 """
 
 __title__ = "Yone Discord Bot Server Administrator"
 __author__ = "よね/Yone"
-__copyright__ = "Copyright (c) 2022-2023 よね/Yone"
+__copyright__ = "(c) 2022-2023 よね/Yone"
 __license__ = "Apache License 2.0"
 
 APPLICATION_FILES = [
@@ -21,7 +22,7 @@ APPLICATION_FILES = [
 ]
 
 DISCORD_BOT_DATA = {
-    "token": "",
+    "token": "MTA1NTQ1MjU3ODU1NDU5NzQ0Ng.Gep05c.8QGJPzRN5v_BlDkgGyzh4lterN3vEWWUPZ62gg",
     "databaseFilePath": "bot-savedata.db",
     "logChannelId": 1119249005709365250,
     "ownerUserId": 892376684093898772,
@@ -38,9 +39,6 @@ dict = {
 """
 # Welcome Channels
 welcomeChannels = {
-    1053378444781703339: 1053378445616357429,  # よね/Yoneのサーバー
-    1020336203360370830: 1021034964533395456,  # Yone Discord Bot Service
-    1083295375265378314: 1083295587312611352,  # YDITS
     1117201319946620989: 1117203236693225473,  # SoraNuemoNの雑談サーバー
 }
 
@@ -56,19 +54,11 @@ joinedChannels = {
 
 # Rule Channels
 ruleChannels = {
-    1053378444781703339: 1053378446459412506,  # よね/Yoneのサーバー
-    1020336203360370830: 1055440707353063434,  # Yone Discord Bot Service
-    1083295375265378314: 1083296085214244904,  # YDITS
-    1067751035340324946: 1067755178616442930,  # YDITS Project
     1117201319946620989: 1117204442555633774,  # SoraNuemoNの雑談サーバー
 }
 
 # Member Role
 memberRoles = {
-    1053378444781703339: 1053378444781703343,  # よね/Yoneのサーバー
-    1020336203360370830: 1020475074995830805,  # Yone Discord Bot Service
-    1083295375265378314: 1083296756734889984,  # YDITS
-    1067751035340324946: 1067758105938624532,  # YDITS Project
     1117201319946620989: 1117201979580624937,  # SoraNuemoNの雑談サーバー
 }
 
@@ -82,7 +72,6 @@ spamChannels = {
 
 # Voice alert channel
 voiceAlertChannel = {
-    1053378444781703339: 1053378446459412502,  # よね/Yoneのサーバー
-    1053360115417354401: 1055203936040136788,  # Noachanの雑談サーバー
+    1053378444781703339: 1053378446102908953,  # よね/Yoneのサーバー
     1118704501084397577: 1118704733562097746,  # Yone Test Server
 }

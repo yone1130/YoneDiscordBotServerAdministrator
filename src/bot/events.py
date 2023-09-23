@@ -2,7 +2,8 @@
 
 events.py | bot | Yone Discord Bot Server Administrator
 
-Copyright (c) 2022-2023 よね/Yone
+(c) 2022-2023 よね/Yone
+
 Licensed under the Apache License 2.0
 
 """
@@ -36,13 +37,16 @@ class Events:
         self.client = client
         self.report_type_value = ""
         self.report_user_value = ""
+        self.duplicate_message_count = {}
+        self.message_content_last = ""
 
         @client.event
         async def on_ready():
+            print("[INFO] Logged in.")
             commands = await command_tree.sync()
-            voice_channel_check.start()
-            print("[INFO] Ready.  Waiting for any command and message")
             print(f"[INFO] {len(commands)} command(s) has synced.")
+            voice_channel_check.start()
+            print("[INFO] Ready.")
             return
 
         @client.event
@@ -53,12 +57,40 @@ class Events:
             else:
                 num_mentions = len(message.mentions)
 
-                if client.user in message.mentions:
+                channel_log = self.duplicate_message_count.get(str(message.channel.id), {})
+                if channel_log == {}:
+                    self.duplicate_message_count[str(message.channel.id)] = {
+                        "count": 0,
+                        "user": message.author.id
+                    }
+
+                if message.content == self.message_content_last and message.author.id == self.duplicate_message_count[str(message.channel.id)]["user"]:
+                    self.duplicate_message_count[str(message.channel.id)]["count"] = self.duplicate_message_count[str(message.channel.id)]["count"] + 1
+                else:
+                    self.duplicate_message_count[str(message.channel.id)]["count"] = 0
+
+                self.duplicate_message_count[str(message.channel.id)] = {
+                    "count": self.duplicate_message_count[str(message.channel.id)]["count"],
+                    "user": message.author.id
+                }
+
+                if self.duplicate_message_count[str(message.channel.id)]["count"] >= 5:
+                    embed = discord.Embed(
+                        title="⚠警告⚠",
+                        description="重複した内容を連続して送信する行為は禁止です。\n" + "該当メッセージは削除されます。\n" + "措置: タイムアウト1分",
+                        color=0xFF4040,
+                    ).set_footer(text="警告種別コード: 2")
+
                     await message.reply(
-                        content="サポートが必要な場合はプロフィールにある招待リンクからサポートサーバーへ参加してください。/info コマンドを使用して、このBotの情報を表示します。\n"
-                        + "Hi. Do you need help? You can join this bot's support server. Please check the invite link on my profile. And type the /info command to see information about this bot."
+                        embed=embed,
+                        delete_after=15,
                     )
-                    return
+                    await message.delete()
+
+                    until = datetime.timedelta(seconds=60)
+                    await message.author.timeout(until, reason="スパム行為: 重複した内容の連投")
+                
+                self.message_content_last = message.content
 
                 if num_mentions >= 5 and (
                     not message.author.guild_permissions.administrator
@@ -92,6 +124,13 @@ class Events:
                     await message.delete()
                     await log_channel.send(embed=embed_of_log)
 
+                    return
+                
+                if client.user in message.mentions:
+                    await message.reply(
+                        content="サポートが必要な場合はプロフィールにある招待リンクからサポートサーバーへ参加してください。/info コマンドを使用して、このBotの情報を表示します。\n"
+                        + "Hi. Do you need help? You can join this bot's support server. Please check the invite link on my profile. And type the /info command to see information about this bot."
+                    )
                     return
 
             return
@@ -260,6 +299,9 @@ class Events:
         @client.event
         async def on_voice_state_update(member, before, after):
             if before.channel is None:
+                if member.bot:
+                    return
+
                 try:
                     data = database.get_vc_alert_disable_channels(
                         target=after.channel.id

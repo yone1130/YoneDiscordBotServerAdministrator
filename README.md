@@ -33,5 +33,6 @@ $ python -m YoneDiscordBotServerAdministrator
 ```
 
 ## LICENSE
+
 Apache License 2.0
 [License File](https://github.com/yone1130/YoneDiscordBotServerAdministrator/blob/main/LICENSE)

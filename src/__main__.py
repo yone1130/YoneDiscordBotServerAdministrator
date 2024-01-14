@@ -1,10 +1,10 @@
 """
 
-__main__.py | Yone Discord Bot Server Administrator
+Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright (c) 2022-2024 よね/Yone
 
-Licensed under the Apache License 2.0
+Licensed under the Apache License 2.0.
 
 """
 
@@ -12,9 +12,9 @@ import os
 import discord
 from discord.ext import tasks
 
-
 class YoneDiscordBotServerAdministrator:
     CONFIG_FILE_PATH = "data/config.py"
+
 
     def __init__(self) -> None:
         try:
@@ -96,11 +96,13 @@ class YoneDiscordBotServerAdministrator:
                 error_code=0x0202, text="Unhandled exception has occurred.", error=error
             )
 
+
     def clear_console(self) -> int:
         if os.name in ("nt", "dos"):
             return os.system(command="cls")
         else:
             return os.system(command="clear")
+
 
     def import_modules(self) -> None:
         if os.path.exists(self.CONFIG_FILE_PATH):
@@ -128,6 +130,7 @@ class YoneDiscordBotServerAdministrator:
 
         return
 
+
     def error_file_not_found(self, file_path):
         print(
             f"\n"
@@ -138,6 +141,7 @@ class YoneDiscordBotServerAdministrator:
             end="\n\n",
         )
         exit()
+
 
     def error(self, *, error_code: int, text: str, error: Exception) -> None:
         print(

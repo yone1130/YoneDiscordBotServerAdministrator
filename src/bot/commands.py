@@ -1,10 +1,10 @@
 """
 
-commands.py | bot | Yone Discord Bot Server Administrator
+Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright (c) 2022-2024 よね/Yone
 
-Licensed under the Apache License 2.0
+Licensed under the Apache License 2.0.
 
 """
 
@@ -15,7 +15,6 @@ from data import config
 from database import BotDatabase
 from errors import *
 from bot.voice.voice_client import VoiceClient
-
 
 class Commands:
     def __init__(

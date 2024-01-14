@@ -1,16 +1,15 @@
 """
 
-report.py | bot | Yone Discord Bot Server Administrator
+Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright (c) 2022-2024 よね/Yone
 
-Licensed under the Apache License 2.0
+Licensed under the Apache License 2.0.
 
 """
 
 import discord
 from data import config
-
 
 class Report:
     SELECTS = {
@@ -20,8 +19,10 @@ class Report:
         "user-sus": "何かあったわけではないが、不審なユーザーがいる",
     }
 
+
     async def __init__(self) -> None:
         pass
+
 
     async def send(
         *,
@@ -40,6 +41,7 @@ class Report:
 class ReportView:
     def __init__(self) -> None:
         pass
+
 
     def make_view() -> discord.ui.View:
         view = (
@@ -82,6 +84,7 @@ class ReportView:
 class EmbedOfReceiveReport:
     def __init__(self) -> None:
         pass
+
 
     def embed(*, user: discord.User, title: str, content: str) -> discord.Embed:
         embed = (

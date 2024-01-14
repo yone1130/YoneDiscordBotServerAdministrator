@@ -1,10 +1,10 @@
 """
 
-events.py | bot | Yone Discord Bot Server Administrator
+Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright (c) 2022-2024 よね/Yone
 
-Licensed under the Apache License 2.0
+Licensed under the Apache License 2.0.
 
 """
 
@@ -20,7 +20,6 @@ from errors import *
 from voice_channel_check import Voice_channel_check
 
 from .Modals.report_modal import ReportModal
-
 
 class Events:
     def __init__(

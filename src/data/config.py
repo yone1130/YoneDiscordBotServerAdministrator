@@ -1,17 +1,17 @@
 """
 
-config.py | data | Yone Discord Bot Server Administrator
+Yone Discord Bot Server Administrator
 
-(c) 2022-2023 よね/Yone
+Copyright (c) 2022-2024 よね/Yone
 
-Licensed under the Apache License 2.0
+Licensed under the Apache License 2.0.
 
 """
 
 __title__ = "Yone Discord Bot Server Administrator"
 __author__ = "よね/Yone"
-__copyright__ = "(c) 2022-2023 よね/Yone"
-__license__ = "Apache License 2.0"
+__copyright__ = "© 2022-2024 よね/Yone"
+__license__ = "Licensed under the Apache License 2.0"
 
 APPLICATION_FILES = [
     "errors.py",
@@ -22,7 +22,7 @@ APPLICATION_FILES = [
 ]
 
 DISCORD_BOT_DATA = {
-    "token": "MTA1NTQ1MjU3ODU1NDU5NzQ0Ng.Gep05c.8QGJPzRN5v_BlDkgGyzh4lterN3vEWWUPZ62gg",
+    "token": "",
     "databaseFilePath": "bot-savedata.db",
     "logChannelId": 1119249005709365250,
     "ownerUserId": 892376684093898772,

@@ -2,7 +2,7 @@
 
 Yone Discord Bot Server Administrator
 
-Copyright (c) 2022-2024 よね/Yone
+Copyright (c) よね/Yone
 
 Licensed under the Apache License 2.0.
 
@@ -10,8 +10,8 @@ Licensed under the Apache License 2.0.
 
 __title__ = "Yone Discord Bot Server Administrator"
 __author__ = "よね/Yone"
-__copyright__ = "© 2022-2024 よね/Yone"
-__license__ = "Licensed under the Apache License 2.0"
+__copyright__ = "© よね/Yone"
+__license__ = "Apache License 2.0"
 
 APPLICATION_FILES = [
     "errors.py",

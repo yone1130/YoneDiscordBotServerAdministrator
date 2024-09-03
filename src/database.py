@@ -2,7 +2,7 @@
 
 Yone Discord Bot Server Administrator
 
-Copyright (c) よね/Yone
+Copyright (C) よね/Yone
 
 Licensed under the Apache License 2.0.
 

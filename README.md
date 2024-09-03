@@ -1,34 +1,32 @@
-
 # Yone Discord Bot Server Administrator
+
+[→ 日本語](./README_JP.md)
 
 ## Overview
 
-サーバー管理用のDiscordBotです。
+Discord server administration bot
 
 ## Usage
 
-1. インストール
-
-`requirements.txt` に記述しているモジュールが不足している場合は、以下のコマンドを使用してインストールします。
+1. Install
 
 ```
 pip install -r requirements.txt
 ```
 
-2. Configを設定
+2. Setup Config
 
-`src/data/config.py` の `TOKEN`, `LOG_CHANNEL_ID`, `OWNER_USER_ID`, `MAIN_GUILD_ID`, `DATABASE_FILE_PATH`, `REPORT_POST_CHANNEL` に任意の値を指定します。これらが正しく指定されていない場合は動作しません。必要に応じて、その他の定数も指定します。
+Specify any value in `token`, `logChannelId`, `ownerUserId`, `mainGuildId`, `databaseFilePath`, `reportPostChannelId` in `src/data/config.py`. If these are not specified correctly, the operation will not work.  
+Specify other constants as needed.
 
-3. 実行
-
-以下のコマンドを使用してプロジェクトを実行します。
+3. Run
 
 ```
-python -m YoneDiscordBotServerAdministrator
+python -m src
 ```
 
 ## LICENSE
 
-Licensed under the [Apache License 2.0](https://github.com/yone1130/YoneDiscordBotServerAdministrator/blob/main/LICENSE).
+Licensed under the [Apache License 2.0](./LICENSE).
 
-Copyright (c) よね/Yone
+Copyright (C) よね/Yone

@@ -9,8 +9,11 @@ Licensed under the Apache License 2.0.
 """
 
 __title__ = "Yone Discord Bot Server Administrator"
+__version__ = ""
+__description__ = "Discord server administration bot"
+__description_jp__ = "Discordサーバー管理Bot"
 __author__ = "よね/Yone"
-__copyright__ = "© よね/Yone"
+__copyright__ = "Copyright (C) よね/Yone"
 __license__ = "Apache License 2.0"
 
 APPLICATION_FILES = [

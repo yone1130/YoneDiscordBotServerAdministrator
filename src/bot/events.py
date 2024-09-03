@@ -21,6 +21,7 @@ from voice_channel_check import Voice_channel_check
 
 from .Modals.report_modal import ReportModal
 
+
 class Events:
     def __init__(
         self,
@@ -56,27 +57,40 @@ class Events:
             else:
                 num_mentions = len(message.mentions)
 
-                channel_log = self.duplicate_message_count.get(str(message.channel.id), {})
+                channel_log = self.duplicate_message_count.get(
+                    str(message.channel.id), {}
+                )
                 if channel_log == {}:
                     self.duplicate_message_count[str(message.channel.id)] = {
                         "count": 0,
-                        "user": message.author.id
+                        "user": message.author.id,
                     }
 
-                if message.content == self.message_content_last and message.author.id == self.duplicate_message_count[str(message.channel.id)]["user"]:
-                    self.duplicate_message_count[str(message.channel.id)]["count"] = self.duplicate_message_count[str(message.channel.id)]["count"] + 1
+                if (
+                    message.content == self.message_content_last
+                    and message.author.id
+                    == self.duplicate_message_count[str(message.channel.id)]["user"]
+                ):
+                    self.duplicate_message_count[str(message.channel.id)]["count"] = (
+                        self.duplicate_message_count[str(message.channel.id)]["count"]
+                        + 1
+                    )
                 else:
                     self.duplicate_message_count[str(message.channel.id)]["count"] = 0
 
                 self.duplicate_message_count[str(message.channel.id)] = {
-                    "count": self.duplicate_message_count[str(message.channel.id)]["count"],
-                    "user": message.author.id
+                    "count": self.duplicate_message_count[str(message.channel.id)][
+                        "count"
+                    ],
+                    "user": message.author.id,
                 }
 
                 if self.duplicate_message_count[str(message.channel.id)]["count"] >= 5:
                     embed = discord.Embed(
                         title="⚠警告⚠",
-                        description="重複した内容を連続して送信する行為は禁止です。\n" + "該当メッセージは削除されます。\n" + "措置: タイムアウト1分",
+                        description="重複した内容を連続して送信する行為は禁止です。\n"
+                        + "該当メッセージは削除されます。\n"
+                        + "措置: タイムアウト1分",
                         color=0xFF4040,
                     ).set_footer(text="警告種別コード: 2")
 
@@ -87,8 +101,10 @@ class Events:
                     await message.delete()
 
                     until = datetime.timedelta(seconds=60)
-                    await message.author.timeout(until, reason="スパム行為: 重複した内容の連投")
-                
+                    await message.author.timeout(
+                        until, reason="スパム行為: 重複した内容の連投"
+                    )
+
                 self.message_content_last = message.content
 
                 if num_mentions >= 5 and (
@@ -100,7 +116,8 @@ class Events:
 
                     embed = discord.Embed(
                         title="⚠警告⚠",
-                        description="大量メンション行為は禁止です。\n" + "該当メッセージは削除されます。\n",
+                        description="大量メンション行為は禁止です。\n"
+                        + "該当メッセージは削除されます。\n",
                         color=0xFF4040,
                     ).set_footer(text="警告種別コード: 1")
 
@@ -112,7 +129,9 @@ class Events:
                             color=0xFFFF40,
                         )
                         .add_field(name="チャンネル", value=message.channel.mention)
-                        .add_field(name="メッセージ送信者", value=message.author.mention)
+                        .add_field(
+                            name="メッセージ送信者", value=message.author.mention
+                        )
                         .add_field(name="メッセージ内容", value=f"{message.content}")
                     )
 
@@ -124,7 +143,7 @@ class Events:
                     await log_channel.send(embed=embed_of_log)
 
                     return
-                
+
                 if client.user in message.mentions:
                     await message.reply(
                         content="サポートが必要な場合はプロフィールにある招待リンクからサポートサーバーへ参加してください。/info コマンドを使用して、このBotの情報を表示します。\n"
@@ -282,7 +301,9 @@ class Events:
                 roles = reaction.member.guild.get_role(
                     config.memberRoles[reaction.member.guild.id]
                 )
-                await reaction.member.add_roles(roles, reason="ガイドラインに同意しました。")
+                await reaction.member.add_roles(
+                    roles, reason="ガイドラインに同意しました。"
+                )
 
             # Voice channel check message
             messages_of_vc_check = list(voice_check_messages.values())
@@ -363,7 +384,9 @@ class Events:
                         voice_check_messages.update({user_attr.id: msg})
 
                     else:
-                        await user_attr.move_to(None, reason="応答なしのため自動切断しました。")
+                        await user_attr.move_to(
+                            None, reason="応答なしのため自動切断しました。"
+                        )
                         msg = await channel.send(
                             content=f"{user_attr.mention} 応答がないためボイスチャンネルから自動切断されました。"
                         )
@@ -398,7 +421,9 @@ class Events:
                     title=SELECTS[value],
                     content=f"{user.mention} ({user.name})",
                 )
-                await interaction.response.send_message(content="通報内容を送信しました。")
+                await interaction.response.send_message(
+                    content="通報内容を送信しました。"
+                )
                 self.report_type_value = ""
                 self.report_user_value = ""
                 return

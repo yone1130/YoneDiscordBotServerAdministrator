@@ -11,6 +11,7 @@ Licensed under the Apache License 2.0.
 import discord
 from data import config
 
+
 class Report:
     SELECTS = {
         "text": "通報内容を自分で入力する",
@@ -19,10 +20,8 @@ class Report:
         "user-sus": "何かあったわけではないが、不審なユーザーがいる",
     }
 
-
     async def __init__(self) -> None:
         pass
-
 
     async def send(
         *,
@@ -41,7 +40,6 @@ class Report:
 class ReportView:
     def __init__(self) -> None:
         pass
-
 
     def make_view() -> discord.ui.View:
         view = (
@@ -64,15 +62,20 @@ class ReportView:
                 discord.ui.Select(
                     custom_id="select_report_type",
                     options=[
-                        discord.SelectOption(label="通報内容を自分で入力する", value="text"),
                         discord.SelectOption(
-                            label="スパム行為を行っているユーザーを発見した", value="user-spam"
+                            label="通報内容を自分で入力する", value="text"
                         ),
                         discord.SelectOption(
-                            label="荒らし行為を行っているユーザーを発見した", value="user-troll"
+                            label="スパム行為を行っているユーザーを発見した",
+                            value="user-spam",
                         ),
                         discord.SelectOption(
-                            label="何かあったわけではないが、不審なユーザーがいる", value="user-sus"
+                            label="荒らし行為を行っているユーザーを発見した",
+                            value="user-troll",
+                        ),
+                        discord.SelectOption(
+                            label="何かあったわけではないが、不審なユーザーがいる",
+                            value="user-sus",
                         ),
                     ],
                 )
@@ -85,11 +88,16 @@ class EmbedOfReceiveReport:
     def __init__(self) -> None:
         pass
 
-
     def embed(*, user: discord.User, title: str, content: str) -> discord.Embed:
         embed = (
-            discord.Embed(title="通報", description="ユーザーからの通報を受け取りました。", color=0xF04040)
-            .add_field(name="■ 通報者 (ユーザーID)", value=f"{user.mention} ({user.name})")
+            discord.Embed(
+                title="通報",
+                description="ユーザーからの通報を受け取りました。",
+                color=0xF04040,
+            )
+            .add_field(
+                name="■ 通報者 (ユーザーID)", value=f"{user.mention} ({user.name})"
+            )
             .add_field(name="■ 通報件名", value=title)
             .add_field(name="通報内容", value=content)
         )

@@ -11,11 +11,11 @@ Licensed under the Apache License 2.0.
 from discord.gateway import DiscordVoiceWebSocket
 from discord import VoiceClient
 
+
 class MyVoiceWebSocket(DiscordVoiceWebSocket):
     def __init__(self, socket, loop):
         super().__init__(socket, loop)
         self.record_ready = False
-
 
     async def received_message(self, msg):
         await super(MyVoiceWebSocket, self).received_message(msg)
@@ -30,14 +30,12 @@ class MyVoiceClient(VoiceClient):
         super().__init__(client, channel)
         self.record_task = None
 
-
     async def recv_voice_packet(self):
         if not self.ws.record_ready:
             raise ValueError("Not Record Ready")
 
         while True:
             recv = await self.loop.sock_recv(self.socket, 2**16)
-
 
     async def connect_websocket(self) -> MyVoiceWebSocket:
         ws = await MyVoiceWebSocket.from_client(self)
@@ -46,7 +44,6 @@ class MyVoiceClient(VoiceClient):
             await ws.poll_event()
         self._connected.set()
         return ws
-
 
     def decrypt_xsalsa20_poly1305(self, data: bytes) -> tuple:
         box = nacl.secret.SecretBox(bytes(self.secret_key))
@@ -61,7 +58,6 @@ class MyVoiceClient(VoiceClient):
             nonce[:12] = header
         return header, box.decrypt(bytes(encrypted), bytes(nonce))
 
-
     def decrypt_xsalsa20_poly1305_suffix(self, data: bytes) -> tuple:
         box = nacl.secret.SecretBox(bytes(self.secret_key))
         is_rtcp = 200 <= data[1] < 205
@@ -70,7 +66,6 @@ class MyVoiceClient(VoiceClient):
         else:
             header, encrypted, nonce = data[:12], data[12:-24], data[-24:]
         return header, box.decrypt(bytes(encrypted), bytes(nonce))
-
 
     def decrypt_xsalsa20_poly1305_lite(self, data: bytes) -> tuple:
         box = nacl.secret.SecretBox(bytes(self.secret_key))

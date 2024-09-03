@@ -16,6 +16,7 @@ from database import BotDatabase
 from errors import *
 from bot.voice.voice_client import VoiceClient
 
+
 class Commands:
     def __init__(
         self,
@@ -62,7 +63,8 @@ class Commands:
                     purge_limit = target + 1
 
                     deleted = await inter.channel.purge(
-                        limit=purge_limit, reason=f"{inter.user.name} が /clear を使用しました。"
+                        limit=purge_limit,
+                        reason=f"{inter.user.name} が /clear を使用しました。",
                     )
 
                     num_of_deleted = len(deleted)
@@ -144,7 +146,9 @@ class Commands:
                         errors.exception_log_message_send(error=error)
 
                         embed = errors.embed_of_exception(
-                            err_code=0x0202, text="データベースの読み込みに失敗しました。", error=error
+                            err_code=0x0202,
+                            text="データベースの読み込みに失敗しました。",
+                            error=error,
                         )
 
                         await inter.response.send_message(
@@ -219,7 +223,9 @@ class Commands:
                         errors.exception_log_message_send(error=error)
 
                         embed = errors.embed_of_exception(
-                            err_code=0x0202, text="データベースの読み込みに失敗しました。", error=error
+                            err_code=0x0202,
+                            text="データベースの読み込みに失敗しました。",
+                            error=error,
                         )
 
                         await inter.response.send_message(
@@ -294,7 +300,9 @@ class Commands:
                         errors.exception_log_message_send(error=errors)
 
                         embed = errors.embed_of_exception(
-                            err_code=0x0202, text="データベースの読み込みに失敗しました。", error=error
+                            err_code=0x0202,
+                            text="データベースの読み込みに失敗しました。",
+                            error=error,
                         )
 
                         await inter.response.send_message(
@@ -369,7 +377,9 @@ class Commands:
                         errors.exception_log_message_send(error=errors)
                         await inter.response.send_message(
                             embed=errors.embed_of_exception(
-                                err_code=0x0202, text="データベースの読み込みに失敗しました。", error=error
+                                err_code=0x0202,
+                                text="データベースの読み込みに失敗しました。",
+                                error=error,
                             ),
                             ephemeral=True,
                         )
